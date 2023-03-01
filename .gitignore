@@ -13,3 +13,4 @@ target/
 *.iml
 *.ipr
 /.idea/inspectionProfiles/
+/dependency-reduced-pom.xml
