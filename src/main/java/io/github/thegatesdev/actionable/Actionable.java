@@ -55,7 +55,5 @@ public class Actionable extends JavaPlugin {
         } else {
             throw new ElementException(element, "Expected a map with x y z, a list with 3 or less elements, or a number");
         }
-    }).info(info -> {
-        info.description("A vector represents an x,y,z value.", "Possible inputs: ", "A list of 3 or less numbers ,", "A single number,", "A map with x y z values.");
-    });
+    }).info(info -> info.description("A vector represents an x,y,z value.", "Possible inputs: ", "A list of 3 or less numbers ,", "A single number,", "A map with x y z values."));
 }
