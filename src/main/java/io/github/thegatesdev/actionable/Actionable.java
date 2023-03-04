@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -24,13 +25,14 @@ public class Actionable extends JavaPlugin {
         Factories.registerAll();
     }
 
-    public static final Readable<PotionEffectType> EFFECT_TYPE = Readable.primitive("potion_effect", PotionEffectType.class, primitive -> {
+    public static final Readable<PotionEffectType> EFFECT_TYPE = Readable.single("potion_effect", PotionEffectType.class, primitive -> {
         final String effectName = primitive.requireValue(String.class);
         final PotionEffectType byName = PotionEffectType.getByName(effectName);
         if (byName == null)
             throw new ElementException(primitive, "effect '%s' does not exist!".formatted(effectName));
         return byName;
-    });
+    }).info(info ->
+            info.description("Possible values: " + String.join(", ", Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toArray(String[]::new))));
     public static final Readable<Vector> VECTOR = new Readable<>("vector", Vector.class, element -> {
         if (element.isMap()) {
             final DataMap map = element.asMap();
@@ -51,7 +53,9 @@ public class Actionable extends JavaPlugin {
             }
             return new Vector(out[0], out[1], out[2]);
         } else {
-            throw new ElementException(element, "Expected a map with x y z, a list with 3 elements, or a number");
+            throw new ElementException(element, "Expected a map with x y z, a list with 3 or less elements, or a number");
         }
+    }).info(info -> {
+        info.description("A vector represents an x,y,z value.", "Possible inputs: ", "A list of 3 or less numbers ,", "A single number,", "A map with x y z values.");
     });
 }
