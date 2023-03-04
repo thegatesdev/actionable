@@ -86,7 +86,7 @@ public final class ActionFactory<T> implements Identifiable, Factory<Consumer<T>
 
     @Nonnull
     @Override
-    public ReadableOptions getReadableOptions() {
+    public ReadableOptions readableOptions() {
         return readableOptions;
     }
 

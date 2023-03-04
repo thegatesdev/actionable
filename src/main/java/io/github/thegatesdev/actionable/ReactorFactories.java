@@ -98,7 +98,7 @@ public class ReactorFactories implements Identifiable, DataTypeHolder<ReactorFac
     }
 
     @Override
-    public final DataType<ReactorFactory<?>.ReadReactor> getDataType() {
+    public final DataType<ReactorFactory<?>.ReadReactor> dataType() {
         return dataType;
     }
 

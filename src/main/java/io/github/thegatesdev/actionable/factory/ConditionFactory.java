@@ -64,7 +64,7 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
 
     @Nonnull
     @Override
-    public ReadableOptions getReadableOptions() {
+    public ReadableOptions readableOptions() {
         return readableOptions;
     }
 

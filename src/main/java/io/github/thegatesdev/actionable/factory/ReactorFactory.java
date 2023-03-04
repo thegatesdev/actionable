@@ -66,12 +66,12 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     }
 
     public <D> ReactorFactory<E> addPerformer(String name, Function<E, D> dataGetter, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD) {
-        return addPerformer(name, null, dataGetter, cD.getDataType(), aD.getDataType());
+        return addPerformer(name, null, dataGetter, cD.dataType(), aD.dataType());
     }
 
     public <D> ReactorFactory<E> addPerformer(String name, Iterable<? extends Function<E, D>> dataGetters, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD) {
         for (final Function<E, D> getter : dataGetters) {
-            addPerformer(name, null, getter, cD.getDataType(), aD.getDataType());
+            addPerformer(name, null, getter, cD.dataType(), aD.dataType());
         }
         return this;
     }
@@ -90,7 +90,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
 
     @Nonnull
     @Override
-    public ReadableOptions getReadableOptions() {
+    public ReadableOptions readableOptions() {
         return readableOptions;
     }
 

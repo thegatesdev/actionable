@@ -75,7 +75,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>io.github.thegatesdev:mapletree</include>
-                                    <include>io.github.thegatesdev:threshold</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -117,13 +116,8 @@
         <!-- Shaded -->
         <dependency>
             <groupId>io.github.thegatesdev</groupId>
-            <artifactId>threshold</artifactId>
-            <version>0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.thegatesdev</groupId>
             <artifactId>mapletree</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
         <!-- END Shaded -->
         <dependency>
