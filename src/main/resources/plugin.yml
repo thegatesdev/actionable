@@ -5,3 +5,4 @@ api-version: 1.19
 main: io.github.thegatesdev.actionable.Actionable
 depend:
   - Eventador
+  - Threshold

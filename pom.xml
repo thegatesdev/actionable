@@ -134,5 +134,11 @@
             <version>1.1.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.thegatesdev</groupId>
+            <artifactId>threshold</artifactId>
+            <version>0.2</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
