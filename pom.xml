@@ -6,7 +6,7 @@
 
     <groupId>io.github.thegatesdev</groupId>
     <artifactId>actionable</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>io.github.thegatesdev</groupId>
             <artifactId>eventador</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

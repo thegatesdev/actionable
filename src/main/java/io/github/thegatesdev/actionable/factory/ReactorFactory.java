@@ -1,7 +1,7 @@
 package io.github.thegatesdev.actionable.factory;
 
-import io.github.thegatesdev.eventador.event.EventManager;
-import io.github.thegatesdev.eventador.event.util.Reactor;
+import io.github.thegatesdev.eventador.EventManager;
+import io.github.thegatesdev.eventador.Reactor;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.mapletree.data.DataTypeHolder;
 import io.github.thegatesdev.mapletree.data.Factory;

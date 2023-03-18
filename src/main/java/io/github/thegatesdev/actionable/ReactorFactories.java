@@ -1,8 +1,8 @@
 package io.github.thegatesdev.actionable;
 
 import io.github.thegatesdev.actionable.factory.ReactorFactory;
-import io.github.thegatesdev.eventador.event.EventManager;
-import io.github.thegatesdev.eventador.event.util.EventData;
+import io.github.thegatesdev.eventador.EventData;
+import io.github.thegatesdev.eventador.EventManager;
 import io.github.thegatesdev.maple.exception.ElementException;
 import io.github.thegatesdev.mapletree.data.DataType;
 import io.github.thegatesdev.mapletree.data.DataTypeHolder;
@@ -44,7 +44,7 @@ public class ReactorFactories implements Identifiable, DataTypeHolder<ReactorFac
     }
 
     public final ReactorFactory<?> getFactory(String eventId) {
-        return getFactory(eventManager.eventClass(eventId));
+        return getFactory(eventManager.eventById(eventId));
     }
 
     // -- MASS ACTION
@@ -56,7 +56,7 @@ public class ReactorFactories implements Identifiable, DataTypeHolder<ReactorFac
             output = (Set<ReactorFactory<? extends E>>) factoriesOfCache.get(baseEventClass);
             if (output != null) return output;
         }
-        final Set<Class<? extends E>> classes = eventManager.allEventsOf(baseEventClass);
+        final Set<Class<? extends E>> classes = eventManager.listenableSubEvents(baseEventClass);
         output = new HashSet<>(classes.size());
         for (Class<? extends Event> clazz : classes)
             output.add((ReactorFactory<? extends E>) getFactory(clazz));
@@ -66,27 +66,25 @@ public class ReactorFactories implements Identifiable, DataTypeHolder<ReactorFac
 
     public final <E extends Event> void doWithFactories(Class<E> baseEventClass, Consumer<ReactorFactory<? extends E>> consumer) {
         final var eventFactories = factoriesOf(baseEventClass);
-        eventFactories.forEach(consumer);
         if (eventFactories.isEmpty()) throw new RuntimeException("Warning: doWithFactoriesOf did nothing");
+        eventFactories.forEach(consumer);
     }
 
-    public final <T> void addPerformers(EventData<T> eventData, DataTypeHolder<? extends Consumer<T>> actionType, DataTypeHolder<? extends Predicate<T>> conditionType) {
-        for (final Class<? extends Event> aClass : eventData.eventSet()) {
-            addPerformersFor(aClass, null, eventData, actionType, conditionType); // Move to other method to have common type ( E )
-        }
+    public final <D> void addPerformers(EventData<D> eventData, DataTypeHolder<? extends Consumer<D>> actionType, DataTypeHolder<? extends Predicate<D>> conditionType) {
+        eventData.forEach(entry -> addPerformer(entry, null, actionType, conditionType));
     }
 
     @SuppressWarnings("unchecked")
-    public final <E extends Event, T> void addPerformers(Class<E> baseEventClass, Predicate<E> eventPredicate, EventData<T> eventData, DataTypeHolder<? extends Consumer<T>> actionType, DataTypeHolder<? extends Predicate<T>> conditionType) {
-        for (final Class<? extends Event> aClass : eventData.eventSet()) {
-            if (baseEventClass.isAssignableFrom(aClass))
-                addPerformersFor((Class<E>) aClass, eventPredicate, eventData, actionType, conditionType);
-        }
+    public final <E extends Event, D> void addPerformers(EventData<D> eventData, Class<E> baseEventClass, Predicate<E> eventPredicate, DataTypeHolder<? extends Consumer<D>> actionType, DataTypeHolder<? extends Predicate<D>> conditionType) {
+        eventData.forEach(entry -> {
+            if (baseEventClass.isAssignableFrom(entry.eventClass()))
+                addPerformer(((EventData<D>.DataEntry<E>) entry), eventPredicate, actionType, conditionType);
+        });
     }
 
-    private <T, E extends Event> void addPerformersFor(Class<E> eventClass, Predicate<E> eventPredicate, EventData<T> eventData, DataTypeHolder<? extends Consumer<T>> actionType, DataTypeHolder<? extends Predicate<T>> conditionType) {
-        final ReactorFactory<E> reactorFactory = getFactory(eventClass);
-        eventData.get(eventClass).forEach((s, function) -> reactorFactory.addPerformer(s, eventPredicate, function, conditionType, actionType));
+    public final <E extends Event, D> void addPerformer(EventData<D>.DataEntry<E> entry, Predicate<E> eventPredicate, DataTypeHolder<? extends Consumer<D>> actionType, DataTypeHolder<? extends Predicate<D>> conditionType) {
+        final ReactorFactory<E> factory = getFactory(entry.eventClass());
+        entry.forEach((s, function) -> factory.addPerformer(s, eventPredicate, function, conditionType, actionType));
     }
 
     // -- GETTERS
