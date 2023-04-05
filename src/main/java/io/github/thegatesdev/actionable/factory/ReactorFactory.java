@@ -1,7 +1,7 @@
 package io.github.thegatesdev.actionable.factory;
 
-import io.github.thegatesdev.eventador.EventManager;
-import io.github.thegatesdev.eventador.Reactor;
+import io.github.thegatesdev.eventador.core.EventType;
+import io.github.thegatesdev.eventador.listener.StaticListener;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.mapletree.data.DataTypeHolder;
 import io.github.thegatesdev.mapletree.data.Factory;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.function.*;
 
 public class ReactorFactory<E extends Event> implements Identifiable, Factory<ReactorFactory<E>.ReadReactor>, ReadableOptionsHolder {
-    private final Class<E> eventClass;
+    private final EventType<E> eventType;
     private final ReadableOptions readableOptions;
     private final String id;
 
@@ -24,18 +24,18 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     private List<BiConsumer<DataMap, E>> staticActions;
     private List<PerformerFactory<?>> performerFactories;
 
-    public ReactorFactory(Class<E> eventClass) {
-        this(eventClass, new ReadableOptions());
+    public ReactorFactory(EventType<E> eventType) {
+        this(eventType, new ReadableOptions());
     }
 
-    public ReactorFactory(Class<E> eventClass, ReadableOptions readableOptions) {
-        this.id = EventManager.eventId(eventClass);
-        this.eventClass = eventClass;
+    public ReactorFactory(EventType<E> eventType, ReadableOptions readableOptions) {
+        this.id = eventType.name();
+        this.eventType = eventType;
         this.readableOptions = readableOptions;
     }
 
-    public Class<E> getEventClass() {
-        return eventClass;
+    public EventType<E> getEventType() {
+        return eventType;
     }
 
     public List<PerformerFactory<?>> getPerformerFactories() {
@@ -56,7 +56,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     }
 
 
-    public <D> ReactorFactory<E> addPerformer(String name, Predicate<E> eventPredicate, Function<E, D> dataGetter, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD) {
+    public <D> ReactorFactory<E> addPerformer(String name, Predicate<E> eventPredicate, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD, Function<E, D> dataGetter) {
         if (performerFactories == null) performerFactories = new ArrayList<>(1);
         final PerformerFactory<D> factory = new PerformerFactory<>(name, dataGetter, eventPredicate);
         readableOptions.add(factory.conditionKey, cD, null);
@@ -65,13 +65,13 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         return this;
     }
 
-    public <D> ReactorFactory<E> addPerformer(String name, Function<E, D> dataGetter, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD) {
-        return addPerformer(name, null, dataGetter, cD.dataType(), aD.dataType());
+    public <D> ReactorFactory<E> addPerformer(String name, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD, Function<E, D> dataGetter) {
+        return addPerformer(name, null, cD.dataType(), aD.dataType(), dataGetter);
     }
 
-    public <D> ReactorFactory<E> addPerformer(String name, Iterable<? extends Function<E, D>> dataGetters, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD) {
+    public <D> ReactorFactory<E> addPerformers(String name, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD, Iterable<? extends Function<E, D>> dataGetters) {
         for (final Function<E, D> getter : dataGetters) {
-            addPerformer(name, null, getter, cD.dataType(), aD.dataType());
+            addPerformer(name, null, cD.dataType(), aD.dataType(), getter);
         }
         return this;
     }
@@ -100,7 +100,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     }
 
     // A list of read performers for this event,
-    public class ReadReactor implements Reactor<E> {
+    public class ReadReactor implements StaticListener<E> {
         private final DataMap data;
         private final List<PerformerFactory<?>.Performer> actionPerformers = new ArrayList<>(), conditionPerformers = new ArrayList<>();
 
@@ -114,15 +114,15 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
             }
         }
 
-        private boolean checkConditions(E event, Class<E> type) {
+        private boolean checkConditions(E event) {
             if (staticConditions != null && !Threshold.forEachAND(staticConditions, p -> p.test(data, event)))
                 return false;
             return conditionPerformers.isEmpty() || Threshold.forEachAND(conditionPerformers, p -> p.test(event));
         }
 
         @Override
-        public boolean onEvent(E event, Class<E> type) {
-            if (!checkConditions(event, type)) return false;
+        public boolean callEvent(E event, EventType<E> type) {
+            if (!checkConditions(event)) return false;
             if (staticActions != null && !staticActions.isEmpty()) {
                 for (BiConsumer<DataMap, E> action : staticActions) {
                     action.accept(data, event);
@@ -140,8 +140,8 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
             this.cancelEvent = cancelEvent;
         }
 
-        public Class<E> eventClass() {
-            return ReactorFactory.this.eventClass;
+        public EventType<E> eventClass() {
+            return ReactorFactory.this.eventType;
         }
 
         public ReactorFactory<E> getFactory() {
