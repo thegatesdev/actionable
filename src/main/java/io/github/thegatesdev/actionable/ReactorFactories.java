@@ -57,7 +57,7 @@ public class ReactorFactories implements Identifiable, DataTypeHolder<ReactorFac
             output = (Set<ReactorFactory<? extends E>>) factoriesOfCache.get(baseEventClass);
             if (output != null) return output;
         }
-        final Set<EventType<? extends E>> classes = eventTypes.listenableSubEvents(baseEventClass);
+        final List<EventType<? extends E>> classes = eventTypes.listenableSubEvents(baseEventClass);
         output = new HashSet<>(classes.size());
         for (EventType<?> clazz : classes)
             output.add((ReactorFactory<? extends E>) getFactory(clazz));
