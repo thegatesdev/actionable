@@ -56,7 +56,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     }
 
 
-    public <D> ReactorFactory<E> addPerformer(String name, Predicate<E> eventPredicate, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD, Function<E, D> dataGetter) {
+    public <D> ReactorFactory<E> addPerformer(String name, Predicate<E> eventPredicate, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Function<E, D> dataGetter) {
         if (performerFactories == null) performerFactories = new ArrayList<>(1);
         final PerformerFactory<D> factory = new PerformerFactory<>(name, dataGetter, eventPredicate);
         readableOptions.add(factory.conditionKey, cD, null);
@@ -65,11 +65,11 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         return this;
     }
 
-    public <D> ReactorFactory<E> addPerformer(String name, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD, Function<E, D> dataGetter) {
+    public <D> ReactorFactory<E> addPerformer(String name, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Function<E, D> dataGetter) {
         return addPerformer(name, null, cD.dataType(), aD.dataType(), dataGetter);
     }
 
-    public <D> ReactorFactory<E> addPerformers(String name, DataTypeHolder<? extends Predicate<D>> cD, DataTypeHolder<? extends Consumer<D>> aD, Iterable<? extends Function<E, D>> dataGetters) {
+    public <D> ReactorFactory<E> addPerformers(String name, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Iterable<Function<E, D>> dataGetters) {
         for (final Function<E, D> getter : dataGetters) {
             addPerformer(name, null, cD.dataType(), aD.dataType(), getter);
         }
@@ -121,7 +121,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         }
 
         @Override
-        public boolean callEvent(E event, EventType<E> type) {
+        public boolean callEvent(@Nonnull E event, @Nonnull EventType<E> type) {
             if (!checkConditions(event)) return false;
             if (staticActions != null && !staticActions.isEmpty()) {
                 for (BiConsumer<DataMap, E> action : staticActions) {
