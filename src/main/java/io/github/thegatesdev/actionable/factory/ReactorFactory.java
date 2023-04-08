@@ -1,5 +1,6 @@
 package io.github.thegatesdev.actionable.factory;
 
+import io.github.thegatesdev.eventador.EventTypeHolder;
 import io.github.thegatesdev.eventador.core.EventType;
 import io.github.thegatesdev.eventador.listener.StaticListener;
 import io.github.thegatesdev.maple.data.DataMap;
@@ -100,7 +101,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     }
 
     // A list of read performers for this event,
-    public class ReadReactor implements StaticListener<E> {
+    public class ReadReactor implements StaticListener<E>, EventTypeHolder<E> {
         private final DataMap data;
         private final List<PerformerFactory<?>.Performer> actionPerformers = new ArrayList<>(), conditionPerformers = new ArrayList<>();
 
@@ -140,19 +141,13 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
             this.cancelEvent = cancelEvent;
         }
 
-        public EventType<E> eventClass() {
+        @Override
+        public EventType<E> eventType() {
             return ReactorFactory.this.eventType;
         }
 
         public ReactorFactory<E> getFactory() {
             return ReactorFactory.this;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = data.hashCode();
-            result = 31 * result + (cancelEvent ? 1 : 0);
-            return result;
         }
     }
 
