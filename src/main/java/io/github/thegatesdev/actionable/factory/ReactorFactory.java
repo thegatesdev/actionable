@@ -10,6 +10,7 @@ import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.data.ReadableOptionsHolder;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
 import io.github.thegatesdev.threshold.Threshold;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nonnull;
@@ -122,8 +123,8 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         }
 
         @Override
-        public boolean callEvent(@Nonnull E event, @Nonnull EventType<E> type) {
-            if (!checkConditions(event)) return false;
+        public void callEvent(@Nonnull E event, @Nonnull EventType<E> type) {
+            if (!checkConditions(event)) return;
             if (staticActions != null && !staticActions.isEmpty()) {
                 for (BiConsumer<DataMap, E> action : staticActions) {
                     action.accept(data, event);
@@ -134,7 +135,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
                     p.accept(event);
                 }
             }
-            return cancelEvent;
+            if (cancelEvent && event instanceof Cancellable cancellable) cancellable.setCancelled(true);
         }
 
         public void cancelEvent(boolean cancelEvent) {
