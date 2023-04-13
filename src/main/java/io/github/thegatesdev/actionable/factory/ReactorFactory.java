@@ -70,14 +70,7 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     public <D> ReactorFactory<E> addPerformer(String name, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Function<E, D> dataGetter) {
         return addPerformer(name, null, cD.dataType(), aD.dataType(), dataGetter);
     }
-
-    public <D> ReactorFactory<E> addPerformers(String name, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Iterable<Function<E, D>> dataGetters) {
-        for (final Function<E, D> getter : dataGetters) {
-            addPerformer(name, null, cD.dataType(), aD.dataType(), getter);
-        }
-        return this;
-    }
-
+    
     public ReactorFactory<E> addStaticCondition(BiPredicate<DataMap, E> condition) {
         if (staticConditions == null) staticConditions = new ArrayList<>(1);
         staticConditions.add(condition);
