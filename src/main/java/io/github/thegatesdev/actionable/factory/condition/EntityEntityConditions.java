@@ -1,7 +1,7 @@
 package io.github.thegatesdev.actionable.factory.condition;
 
-import io.github.thegatesdev.actionable.factory.ConditionFactory;
 import io.github.thegatesdev.actionable.Factories;
+import io.github.thegatesdev.actionable.factory.ConditionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
@@ -21,7 +21,8 @@ public final class EntityEntityConditions extends FactoryRegistry<Predicate<Twin
         register(ConditionFactory.orFactory(Factories.ENTITY_ENTITY_CONDITION));
         register(ConditionFactory.andFactory(Factories.ENTITY_ENTITY_CONDITION));
         register(ConditionFactory.flippedFactory(Factories.ENTITY_ENTITY_CONDITION));
-        register(ConditionFactory.splitFactory(Factories.ENTITY_CONDITION, Factories.ENTITY_CONDITION));
+        register(ConditionFactory.splitAndFactory(Factories.ENTITY_CONDITION, Factories.ENTITY_CONDITION));
+        register(ConditionFactory.splitOrFactory(Factories.ENTITY_CONDITION, Factories.ENTITY_CONDITION));
 
         register(new ConditionFactory<>("can_see", (data, twin) -> {
             final Location actorLoc = twin.actor().getLocation();

@@ -32,15 +32,15 @@ public final class ActionFactory<T> implements Identifiable, Factory<Consumer<T>
     }
 
     public static <T> ActionFactory<T> loopFactory(DataTypeHolder<? extends Consumer<T>> loopedActionType) {
-        return new ActionFactory<>("loop", (data, t) -> {
-            final int amount = data.getInt("amount");
+        return new ActionFactory<>("repeat", (data, t) -> {
+            final int times = data.getInt("times");
             final Consumer<T> action = data.getUnsafe("action");
-            for (int i = 0; i < amount; i++) action.accept(t);
-        }, new ReadableOptions().add("amount", Readable.primitive(Number.class)).add("action", loopedActionType));
+            for (int i = 0; i < times; i++) action.accept(t);
+        }, new ReadableOptions().add("times", Readable.primitive(Number.class)).add("action", loopedActionType));
     }
 
     public static <T> ActionFactory<T> loopWhileFactory(DataTypeHolder<? extends Consumer<T>> loopedActionType, DataTypeHolder<? extends Predicate<T>> loopConditionType) {
-        return new ActionFactory<>("loop_while", (data, t) -> {
+        return new ActionFactory<>("repeat_while", (data, t) -> {
             final Consumer<T> action = data.getUnsafe("action");
             final Predicate<T> condition = data.getUnsafe("condition");
             while (condition.test(t)) action.accept(t);

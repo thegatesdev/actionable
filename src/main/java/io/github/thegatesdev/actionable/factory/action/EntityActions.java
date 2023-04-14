@@ -1,8 +1,8 @@
 package io.github.thegatesdev.actionable.factory.action;
 
 import io.github.thegatesdev.actionable.Actionable;
-import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.Factories;
+import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.RaycastType;
 import io.github.thegatesdev.actionable.util.twin.MutableTwin;
 import io.github.thegatesdev.actionable.util.twin.Twin;
@@ -40,9 +40,14 @@ public final class EntityActions extends FactoryRegistry<Consumer<Entity>, Actio
         register(ActionFactory.loopFactory(Factories.ENTITY_ACTION));
         register(ActionFactory.loopWhileFactory(Factories.ENTITY_ACTION, Factories.ENTITY_CONDITION));
 
-        register(new ActionFactory<>("run_location_action", (data, entity) -> data.<Consumer<Location>>getUnsafe("action").accept(entity.getLocation().add(data.<Vector>getUnsafe("offset"))), new ReadableOptions()
+        register(new ActionFactory<>("run_location_action", (data, entity) -> {
+            Vector offset = data.getUnsafe("offset");
+            if (data.getBoolean("relative")) offset = entity.getLocation().getDirection().multiply(offset);
+            data.<Consumer<Location>>getUnsafe("action").accept(entity.getLocation().add(offset));
+        }, new ReadableOptions()
                 .add("offset", Actionable.VECTOR, new Vector(0, 0, 0))
                 .add("action", Factories.LOCATION_ACTION)
+                .add("relative", Readable.primitive(Boolean.class), false)
         ));
 
         register(new ActionFactory<>("run_world_action", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()

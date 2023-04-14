@@ -2,40 +2,38 @@ package io.github.thegatesdev.actionable.factory;
 
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.maple.data.DataMap;
-import io.github.thegatesdev.maple.data.DataPrimitive;
 import io.github.thegatesdev.mapletree.data.DataTypeHolder;
 import io.github.thegatesdev.mapletree.data.Factory;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.data.ReadableOptionsHolder;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
-import io.github.thegatesdev.threshold.Threshold;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>, ReadableOptionsHolder {
     private final String id;
-    private final BiPredicate<DataMap, R> condition;
+    private final BiPredicate<DataMap, R> predicate;
     private final ReadableOptions readableOptions;
 
-    public ConditionFactory(String id, BiPredicate<DataMap, R> condition, ReadableOptions readableOptions) {
+    public ConditionFactory(String id, BiPredicate<DataMap, R> predicate, ReadableOptions readableOptions) {
         this.id = id;
-        this.condition = condition;
+        this.predicate = predicate;
         this.readableOptions = readableOptions;
     }
 
-    public ConditionFactory(String id, BiPredicate<DataMap, R> condition) {
-        this(id, condition, new ReadableOptions());
+    public ConditionFactory(String id, BiPredicate<DataMap, R> predicate) {
+        this(id, predicate, new ReadableOptions());
     }
 
     public static <A, T> ConditionFactory<Twin<A, T>> flippedFactory(DataTypeHolder<? extends Predicate<Twin<T, A>>> dataType) {
-        return new ConditionFactory<>("flip_actor", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new ReadableOptions().add("condition", dataType));
+        return new ConditionFactory<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new ReadableOptions().add("condition", dataType));
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> splitFactory(DataTypeHolder<? extends Predicate<A>> actorCondition, DataTypeHolder<? extends Predicate<T>> targetCondition) {
-        return new ConditionFactory<>("split", (data, twin) -> {
+    public static <A, T> ConditionFactory<Twin<A, T>> splitAndFactory(DataTypeHolder<? extends Predicate<A>> actorCondition, DataTypeHolder<? extends Predicate<T>> targetCondition) {
+        return new ConditionFactory<>("split_and", (data, twin) -> {
             final Predicate<A> aC = data.getUnsafe("actor_condition", null);
             final Predicate<T> tC = data.getUnsafe("target_condition", null);
             return (aC == null || aC.test(twin.actor())) && (tC == null || tC.test(twin.target()));
@@ -45,21 +43,38 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
         );
     }
 
+    public static <A, T> ConditionFactory<Twin<A, T>> splitOrFactory(DataTypeHolder<? extends Predicate<A>> actorCondition, DataTypeHolder<? extends Predicate<T>> targetCondition) {
+        return new ConditionFactory<>("split_or", (data, twin) -> {
+            final Predicate<A> aC = data.getUnsafe("actor_condition", null);
+            final Predicate<T> tC = data.getUnsafe("target_condition", null);
+            return (aC == null || aC.test(twin.actor())) || (tC == null || tC.test(twin.target()));
+        }, new ReadableOptions()
+                .add("actor_condition", actorCondition, null)
+                .add("target_condition", targetCondition, null)
+        );
+    }
+
     public static <T> ConditionFactory<T> andFactory(DataTypeHolder<? extends Predicate<T>> dataType) {
-        return new ConditionFactory<>("and", (data, t) -> Threshold.forEachAND(data.<Collection<Predicate<T>>>getUnsafe("conditions"), condition -> condition.test(t)),
-                new ReadableOptions().add("conditions", dataType.list()));
+        return new ConditionFactory<>("and", (data, t) -> {
+            final var conditions = data.<List<Predicate<T>>>getUnsafe("conditions");
+            for (int i = 0, unsafeSize = conditions.size(); i < unsafeSize; i++)
+                if (!conditions.get(i).test(t)) return false;
+            return true;
+        }, new ReadableOptions().add("conditions", dataType.list()));
     }
 
     public static <T> ConditionFactory<T> orFactory(DataTypeHolder<? extends Predicate<T>> dataType) {
-        return new ConditionFactory<>("or", (data, t) -> Threshold.forEachOR(data.<Collection<Predicate<T>>>getUnsafe("conditions"), condition -> condition.test(t)),
-                new ReadableOptions().add("conditions", dataType.list()));
+        return new ConditionFactory<>("or", (data, t) -> {
+            final var conditions = data.<List<Predicate<T>>>getUnsafe("conditions");
+            for (int i = 0, conditionsSize = conditions.size(); i < conditionsSize; i++)
+                if (conditions.get(i).test(t)) return true;
+            return false;
+        }, new ReadableOptions().add("conditions", dataType.list()));
     }
 
     @Override
     public Predicate<R> build(DataMap data) {
-        final Condition condition = new Condition(readableOptions.read(data));
-        data.ifPresent("reverse", element -> condition.reverse = element.requireOf(DataPrimitive.class).requireValue(Boolean.class));
-        return condition;
+        return new Condition<>(this.predicate, readableOptions.read(data), data.getBoolean("reverse", false));
     }
 
     @Nonnull
@@ -73,19 +88,11 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
         return id;
     }
 
-    private class Condition implements Predicate<R> {
-        private final DataMap data;
-        private boolean reverse = false;
-
-        public Condition(DataMap data) {
-            this.data = data;
-        }
-
-        public boolean test(R r) {
-            if (r == null) throw new NullPointerException("Data for condition was null");
-            boolean test = ConditionFactory.this.condition.test(data, r);
-            if (reverse) return !test;
-            return test;
+    private record Condition<R>(BiPredicate<DataMap, R> condition, DataMap data,
+                                boolean reverse) implements Predicate<R> {
+        @Override
+        public boolean test(final R r) {
+            return condition.test(data, r) != reverse;
         }
     }
 }

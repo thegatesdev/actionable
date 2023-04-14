@@ -9,15 +9,14 @@ import io.github.thegatesdev.mapletree.data.Factory;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.data.ReadableOptionsHolder;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
-import io.github.thegatesdev.threshold.Threshold;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.*;
 
-public class ReactorFactory<E extends Event> implements Identifiable, Factory<ReactorFactory<E>.ReadReactor>, ReadableOptionsHolder {
+public class EventFactory<E extends Event> implements Identifiable, Factory<EventFactory<E>.ReadPerformers>, ReadableOptionsHolder {
     private final EventType<E> eventType;
     private final ReadableOptions readableOptions;
     private final String id;
@@ -26,11 +25,11 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     private List<BiConsumer<DataMap, E>> staticActions;
     private List<PerformerFactory<?>> performerFactories;
 
-    public ReactorFactory(EventType<E> eventType) {
+    public EventFactory(EventType<E> eventType) {
         this(eventType, new ReadableOptions());
     }
 
-    public ReactorFactory(EventType<E> eventType, ReadableOptions readableOptions) {
+    public EventFactory(EventType<E> eventType, ReadableOptions readableOptions) {
         this.id = eventType.name();
         this.eventType = eventType;
         this.readableOptions = readableOptions;
@@ -40,25 +39,22 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         return eventType;
     }
 
-    public List<PerformerFactory<?>> getPerformerFactories() {
-        return Collections.unmodifiableList(performerFactories);
-    }
-
-    public ReadReactor build(DataMap data) {
-        final DataMap readData = readableOptions == null ? new DataMap() : readableOptions.read(data);
-        final List<PerformerFactory<?>.Performer> performers = new LinkedList<>();
-        if (performerFactories != null)
+    public ReadPerformers build(DataMap data) {
+        final DataMap readData = readableOptions == null ? data : readableOptions.read(data);
+        final List<PerformerFactory<?>.Performer> performers = new ArrayList<>();
+        if (performerFactories != null) {
             for (PerformerFactory<?> factory : this.performerFactories) {
                 final PerformerFactory<?>.Performer performer = factory.create(readData);
                 if (performer != null) performers.add(performer);
             }
-        final ReadReactor reactor = new ReadReactor(readData, performers);
-        reactor.cancelEvent(data.getBoolean("cancel", false));
-        return reactor;
+        }
+        final ReadPerformers performer = new ReadPerformers(readData, performers);
+        performer.cancelEvent(data.getBoolean("cancel", false));
+        return performer;
     }
 
 
-    public <D> ReactorFactory<E> addPerformer(String name, Predicate<E> eventPredicate, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Function<E, D> dataGetter) {
+    public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, Predicate<E> eventPredicate, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD) {
         if (performerFactories == null) performerFactories = new ArrayList<>(1);
         final PerformerFactory<D> factory = new PerformerFactory<>(name, dataGetter, eventPredicate);
         readableOptions.add(factory.conditionKey, cD, null);
@@ -67,17 +63,17 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         return this;
     }
 
-    public <D> ReactorFactory<E> addPerformer(String name, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD, Function<E, D> dataGetter) {
-        return addPerformer(name, null, cD.dataType(), aD.dataType(), dataGetter);
+    public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD) {
+        return addPerformer(name, dataGetter, null, cD.dataType(), aD.dataType());
     }
-    
-    public ReactorFactory<E> addStaticCondition(BiPredicate<DataMap, E> condition) {
+
+    public EventFactory<E> addStaticCondition(BiPredicate<DataMap, E> condition) {
         if (staticConditions == null) staticConditions = new ArrayList<>(1);
         staticConditions.add(condition);
         return this;
     }
 
-    public ReactorFactory<E> addStaticAction(BiConsumer<DataMap, E> action) {
+    public EventFactory<E> addStaticAction(BiConsumer<DataMap, E> action) {
         if (staticActions == null) staticActions = new ArrayList<>(1);
         staticActions.add(action);
         return this;
@@ -95,13 +91,13 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
     }
 
     // A list of read performers for this event,
-    public class ReadReactor implements StaticListener<E>, EventTypeHolder<E> {
+    public class ReadPerformers implements StaticListener<E>, EventTypeHolder<E> {
         private final DataMap data;
         private final List<PerformerFactory<?>.Performer> actionPerformers = new ArrayList<>(), conditionPerformers = new ArrayList<>();
 
         private boolean cancelEvent = false;
 
-        public ReadReactor(DataMap data, List<PerformerFactory<?>.Performer> performers) {
+        public ReadPerformers(DataMap data, List<PerformerFactory<?>.Performer> performers) {
             this.data = data;
             for (PerformerFactory<?>.Performer performer : performers) {
                 if (performer.hasAction) actionPerformers.add(performer);
@@ -110,25 +106,27 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
         }
 
         private boolean checkConditions(E event) {
-            if (staticConditions != null && !Threshold.forEachAND(staticConditions, p -> p.test(data, event)))
-                return false;
-            return conditionPerformers.isEmpty() || Threshold.forEachAND(conditionPerformers, p -> p.test(event));
+            if (staticConditions != null)
+                for (int i = 0, staticConditionsSize = staticConditions.size(); i < staticConditionsSize; i++)
+                    if (!staticConditions.get(i).test(data, event)) return false;
+            for (int i = 0, conditionPerformersSize = conditionPerformers.size(); i < conditionPerformersSize; i++)
+                if (!conditionPerformers.get(i).test(event)) return false;
+            return true;
         }
 
         @Override
         public void callEvent(@Nonnull E event, @Nonnull EventType<E> type) {
             if (!checkConditions(event)) return;
-            if (staticActions != null && !staticActions.isEmpty()) {
-                for (BiConsumer<DataMap, E> action : staticActions) {
-                    action.accept(data, event);
-                }
-            }
-            if (!actionPerformers.isEmpty()) {
-                for (PerformerFactory<?>.Performer p : actionPerformers) {
-                    p.accept(event);
-                }
-            }
-            if (cancelEvent && event instanceof Cancellable cancellable) cancellable.setCancelled(true);
+
+            if (staticActions != null)
+                for (int i = 0, staticActionsSize = staticActions.size(); i < staticActionsSize; i++)
+                    staticActions.get(i).accept(data, event);
+
+            if (!actionPerformers.isEmpty())
+                for (int i = 0, actionPerformersSize = actionPerformers.size(); i < actionPerformersSize; i++)
+                    actionPerformers.get(i).accept(event);
+
+            if (cancelEvent) eventType.cancelEvent(event);
         }
 
         public void cancelEvent(boolean cancelEvent) {
@@ -137,11 +135,11 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
 
         @Override
         public EventType<E> eventType() {
-            return ReactorFactory.this.eventType;
+            return EventFactory.this.eventType;
         }
 
-        public ReactorFactory<E> getFactory() {
-            return ReactorFactory.this;
+        public EventFactory<E> getFactory() {
+            return EventFactory.this;
         }
     }
 
@@ -169,28 +167,6 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
             final Predicate<D> condition = data.getUnsafe(conditionKey, null);
             if (action == null && condition == null) return null;
             return new Performer(action, condition);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof ReactorFactory<?>.PerformerFactory<?> that)) return false;
-            if (hasPredicate != that.hasPredicate) return false;
-            if (!dataGetter.equals(that.dataGetter)) return false;
-            if (!Objects.equals(eventPredicate, that.eventPredicate))
-                return false;
-            if (!actionKey.equals(that.actionKey)) return false;
-            return conditionKey.equals(that.conditionKey);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = dataGetter.hashCode();
-            result = 31 * result + (eventPredicate != null ? eventPredicate.hashCode() : 0);
-            result = 31 * result + actionKey.hashCode();
-            result = 31 * result + conditionKey.hashCode();
-            result = 31 * result + (hasPredicate ? 1 : 0);
-            return result;
         }
 
         public class Performer implements Predicate<E>, Consumer<E> {
@@ -221,21 +197,6 @@ public class ReactorFactory<E extends Event> implements Identifiable, Factory<Re
                 if (!hasCondition) prevData = dataGetter.apply(event);
                 if (prevData != null)   // Can still be null since checkCondition being false doesn't guarantee run won't get called.
                     action.accept(prevData);
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (!(o instanceof ReactorFactory<?>.PerformerFactory<?>.Performer performer)) return false;
-                if (!Objects.equals(action, performer.action)) return false;
-                return Objects.equals(condition, performer.condition);
-            }
-
-            @Override
-            public int hashCode() {
-                int result = action != null ? action.hashCode() : 0;
-                result = 31 * result + (condition != null ? condition.hashCode() : 0);
-                return result;
             }
         }
     }
