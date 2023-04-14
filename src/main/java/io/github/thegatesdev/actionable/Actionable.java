@@ -29,7 +29,7 @@ public class Actionable extends JavaPlugin {
                     throw new ElementException(primitive, "effect '%s' does not exist!".formatted(effectName));
                 return byName;
             })
-            .info(info -> info.description("Possible values: " + String.join(", ", Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toArray(String[]::new))));
+            .info(info -> info.representation("Possible values: " + String.join(", ", Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toArray(String[]::new))));
     public static final Readable<Vector> VECTOR = new Readable<>("vector", Vector.class, element -> {
         if (element.isMap()) {
             final DataMap map = element.asMap();
@@ -52,6 +52,5 @@ public class Actionable extends JavaPlugin {
         } else {
             throw new ElementException(element, "Expected a map with x y z, a list with 3 or less elements, or a number");
         }
-    })
-            .info(info -> info.description("A vector represents an x,y,z value.", "Possible inputs: ", "A list of 3 or less numbers ,", "A single number,", "A map with x y z values."));
+    }).info(info -> info.description("A vector represents a 3 dimensional point, with x, y and z number values.").representation("A map with x y and z values, a list with 1 or more values or a single value."));
 }
