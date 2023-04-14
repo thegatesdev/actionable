@@ -1,13 +1,10 @@
 package io.github.thegatesdev.actionable.factory.action;
 
-import io.github.thegatesdev.actionable.factory.ActionFactory;
-
-
 import io.github.thegatesdev.actionable.Factories;
+import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
 import org.bukkit.Location;
@@ -42,9 +39,9 @@ public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Ent
             if (data.getBoolean("set")) launched.setVelocity(direction);
             else launched.setVelocity(launched.getVelocity().add(direction));
         }, new ReadableOptions()
-                .add("amount", Readable.primitive(Number.class), 1)
-                .add("up", Readable.primitive(Number.class), 0)
-                .add("set", Readable.primitive(Boolean.class), false)
+                .add("amount", Readable.number(), 1)
+                .add("up", Readable.number(), 0)
+                .add("set", Readable.bool(), false)
         ));
 
         register(new ActionFactory<>("run_entity_location_action", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", Factories.ENTITY_LOCATION_ACTION)));
@@ -56,7 +53,7 @@ public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Ent
         register(new ActionFactory<>("damage_target", (data, twin) -> {
             if (twin.target() instanceof LivingEntity livingTarget)
                 livingTarget.damage(data.getDouble("amount"), twin.actor());
-        }, new ReadableOptions().add("amount", Readable.primitive(Number.class))));
+        }, new ReadableOptions().add("amount", Readable.number())));
 
         register(new ActionFactory<>("mount_target", (data, twin) -> twin.target().addPassenger(twin.actor())));
     }

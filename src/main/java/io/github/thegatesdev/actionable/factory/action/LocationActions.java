@@ -47,8 +47,8 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
             world.playSound(location, sound, SoundCategory.AMBIENT, volume, pitch);
         }, new ReadableOptions()
                 .add("sound", Readable.enumeration(Sound.class))
-                .add("pitch", Readable.primitive(Number.class), 0)
-                .add("volume", Readable.primitive(Number.class), 1f)
+                .add("pitch", Readable.number(), 0)
+                .add("volume", Readable.number(), 1f)
         ));
 
         register(new ActionFactory<>("fill", (data, location) -> {
@@ -91,8 +91,8 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
         }, new ReadableOptions()
                 .add("particle", Readable.enumeration(Particle.class))
                 .add("material", Readable.enumeration(Material.class))
-                .add("amount", Readable.primitive(Number.class), 1)
-                .add("speed", Readable.primitive(Number.class), 1d)
+                .add("amount", Readable.number(), 1)
+                .add("speed", Readable.number(), 1d)
                 .add(List.of("offset", "vector"), Actionable.VECTOR, new Vector(0, 0, 0))
         ));
 
@@ -116,8 +116,8 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
                 world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
             else world.spigot().strikeLightning(location, data.getBoolean("silent"));
         }, new ReadableOptions()
-                .add("effect_only", Readable.primitive(Boolean.class), false)
-                .add("silent", Readable.primitive(Boolean.class), false)
+                .add("effect_only", Readable.bool(), false)
+                .add("silent", Readable.bool(), false)
         ));
     }
 }

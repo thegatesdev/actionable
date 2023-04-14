@@ -36,7 +36,7 @@ public final class ActionFactory<T> implements Identifiable, Factory<Consumer<T>
             final int times = data.getInt("times");
             final Consumer<T> action = data.getUnsafe("action");
             for (int i = 0; i < times; i++) action.accept(t);
-        }, new ReadableOptions().add("times", Readable.primitive(Number.class)).add("action", loopedActionType));
+        }, new ReadableOptions().add("times", Readable.number()).add("action", loopedActionType));
     }
 
     public static <T> ActionFactory<T> loopWhileFactory(DataTypeHolder<? extends Consumer<T>> loopedActionType, DataTypeHolder<? extends Predicate<T>> loopConditionType) {

@@ -1,8 +1,8 @@
 package io.github.thegatesdev.actionable.factory.action;
 
 import io.github.thegatesdev.actionable.Actionable;
-import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.Factories;
+import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
@@ -63,7 +63,7 @@ public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionF
         }, new ReadableOptions()
                 .add("action", Factories.ENTITY_ACTION)
                 .add("condition", Factories.ENTITY_CONDITION, null)
-                .add("living", Readable.primitive(Boolean.class), false)
+                .add("living", Readable.bool(), false)
         ));
 
         register(new ActionFactory<>("location_action_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()
