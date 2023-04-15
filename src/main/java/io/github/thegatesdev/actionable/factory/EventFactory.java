@@ -2,6 +2,7 @@ package io.github.thegatesdev.actionable.factory;
 
 import io.github.thegatesdev.eventador.EventTypeHolder;
 import io.github.thegatesdev.eventador.core.EventType;
+import io.github.thegatesdev.eventador.listener.StaticListener;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.mapletree.data.DataTypeHolder;
 import io.github.thegatesdev.mapletree.data.Factory;
@@ -92,7 +93,7 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
     }
 
     // A list of read performers for this event,
-    public class ReadPerformers implements EventTypeHolder<E> {
+    public class ReadPerformers implements StaticListener<E>, EventTypeHolder<E> {
         private final DataMap data;
         private final List<PerformerFactory<?>.Performer> actionPerformers = new ArrayList<>(), conditionPerformers = new ArrayList<>();
 
@@ -126,12 +127,18 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
             if (!actionPerformers.isEmpty())
                 for (int i = 0, actionPerformersSize = actionPerformers.size(); i < actionPerformersSize; i++)
                     actionPerformers.get(i).accept(event);
-            // If cancelled option, cancel if possible.
-            if (cancelEvent) eventType.cancelEvent(event);
         }
 
         public void cancelEvent(boolean cancelEvent) {
             this.cancelEvent = eventType.cancellable() && cancelEvent;
+        }
+
+        @Override
+        public void callEvent(@Nonnull final E event, @Nonnull final EventType<E> eventType) {
+            if (checkConditions(event)) {
+                run(event);
+                if (cancelEvent) eventType.cancelEvent(event);
+            }
         }
 
         @Override
