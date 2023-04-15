@@ -27,7 +27,7 @@ public class EventFactories implements Identifiable, DataTypeHolder<EventFactory
             final String s = data.getString("type");
             final EventFactory<?> factory = getFactory(s);
             if (factory == null)
-                throw new ElementException(data, "specified event %s does not exist".formatted(s));
+                throw new ElementException(data, "Specified event %s does not exist".formatted(s));
             return factory.build(data);
         });
     }
@@ -63,8 +63,9 @@ public class EventFactories implements Identifiable, DataTypeHolder<EventFactory
         output = new ArrayList<>(types.size());
         for (EventType<?> type : types)
             output.add((EventFactory<? extends E>) getFactory(type));
-        factoriesOfCache.put(baseEventClass, output);
-        return output;
+        final var nomod = Collections.unmodifiableList(output);
+        factoriesOfCache.put(baseEventClass, nomod);
+        return nomod;
     }
 
     public final <E extends Event> void eachFactory(Class<E> baseEventType, Consumer<EventFactory<? extends E>> consumer) {

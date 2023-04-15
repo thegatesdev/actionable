@@ -2,7 +2,6 @@ package io.github.thegatesdev.actionable.factory;
 
 import io.github.thegatesdev.eventador.EventTypeHolder;
 import io.github.thegatesdev.eventador.core.EventType;
-import io.github.thegatesdev.eventador.listener.StaticListener;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.mapletree.data.DataTypeHolder;
 import io.github.thegatesdev.mapletree.data.Factory;
@@ -13,17 +12,20 @@ import org.bukkit.event.Event;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.*;
 
-public class EventFactory<E extends Event> implements Identifiable, Factory<EventFactory<E>.ReadPerformers>, ReadableOptionsHolder {
+public class EventFactory<E extends Event> implements Identifiable, Factory<EventFactory<E>.ReadPerformers>, ReadableOptionsHolder, EventTypeHolder<E> {
     private final EventType<E> eventType;
     private final ReadableOptions readableOptions;
     private final String id;
 
     private List<BiPredicate<DataMap, E>> staticConditions;
     private List<BiConsumer<DataMap, E>> staticActions;
-    private List<PerformerFactory<?>> performerFactories;
+    private final List<PerformerFactory<?>> performerFactories = new ArrayList<>();
+    private final Set<String> performerNames = new HashSet<>();
 
     public EventFactory(EventType<E> eventType) {
         this(eventType, new ReadableOptions());
@@ -35,18 +37,16 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
         this.readableOptions = readableOptions;
     }
 
-    public EventType<E> getEventType() {
+    public EventType<E> eventType() {
         return eventType;
     }
 
     public ReadPerformers build(DataMap data) {
         final DataMap readData = readableOptions == null ? data : readableOptions.read(data);
         final List<PerformerFactory<?>.Performer> performers = new ArrayList<>();
-        if (performerFactories != null) {
-            for (PerformerFactory<?> factory : this.performerFactories) {
-                final PerformerFactory<?>.Performer performer = factory.create(readData);
-                if (performer != null) performers.add(performer);
-            }
+        for (PerformerFactory<?> factory : this.performerFactories) {
+            final PerformerFactory<?>.Performer performer = factory.create(readData);
+            if (performer != null) performers.add(performer);
         }
         final ReadPerformers performer = new ReadPerformers(readData, performers);
         performer.cancelEvent(data.getBoolean("cancel", false));
@@ -55,7 +55,8 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
 
 
     public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, Predicate<E> eventPredicate, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD) {
-        if (performerFactories == null) performerFactories = new ArrayList<>(1);
+        if (!performerNames.add(name))
+            throw new IllegalArgumentException("Performer by the name of %s already exists for event %s".formatted(name, eventType.name()));
         final PerformerFactory<D> factory = new PerformerFactory<>(name, dataGetter, eventPredicate);
         readableOptions.add(factory.conditionKey, cD, null);
         readableOptions.add(factory.actionKey, aD, null);
@@ -91,7 +92,7 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
     }
 
     // A list of read performers for this event,
-    public class ReadPerformers implements StaticListener<E>, EventTypeHolder<E> {
+    public class ReadPerformers implements EventTypeHolder<E> {
         private final DataMap data;
         private final List<PerformerFactory<?>.Performer> actionPerformers = new ArrayList<>(), conditionPerformers = new ArrayList<>();
 
@@ -105,32 +106,32 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
             }
         }
 
-        private boolean checkConditions(E event) {
+        public boolean checkConditions(E event) {
+            // Check static conditions
             if (staticConditions != null)
                 for (int i = 0, staticConditionsSize = staticConditions.size(); i < staticConditionsSize; i++)
                     if (!staticConditions.get(i).test(data, event)) return false;
+            // Check performer conditions
             for (int i = 0, conditionPerformersSize = conditionPerformers.size(); i < conditionPerformersSize; i++)
                 if (!conditionPerformers.get(i).test(event)) return false;
             return true;
         }
 
-        @Override
-        public void callEvent(@Nonnull E event, @Nonnull EventType<E> type) {
-            if (!checkConditions(event)) return;
-
+        public void run(E event) {
+            // Run static actions
             if (staticActions != null)
                 for (int i = 0, staticActionsSize = staticActions.size(); i < staticActionsSize; i++)
                     staticActions.get(i).accept(data, event);
-
+            // Run performer actions
             if (!actionPerformers.isEmpty())
                 for (int i = 0, actionPerformersSize = actionPerformers.size(); i < actionPerformersSize; i++)
                     actionPerformers.get(i).accept(event);
-
+            // If cancelled option, cancel if possible.
             if (cancelEvent) eventType.cancelEvent(event);
         }
 
         public void cancelEvent(boolean cancelEvent) {
-            this.cancelEvent = cancelEvent;
+            this.cancelEvent = eventType.cancellable() && cancelEvent;
         }
 
         @Override
