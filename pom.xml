@@ -14,6 +14,44 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Shaded -->
+        <dependency>
+            <groupId>com.github.thegatesdev</groupId>
+            <artifactId>mapletree</artifactId>
+            <version>v1.1</version>
+        </dependency>
+        <!-- END Shaded -->
+        <!--suppress VulnerableLibrariesLocal -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.19.3-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+            <classifier>remapped-mojang</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.thegatesdev</groupId>
+            <artifactId>eventador</artifactId>
+            <version>1.4.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.thegatesdev</groupId>
+            <artifactId>threshold</artifactId>
+            <version>0.2</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -113,34 +151,4 @@
         </plugins>
     </build>
 
-    <dependencies>
-        <!-- Shaded -->
-        <dependency>
-            <groupId>io.github.thegatesdev</groupId>
-            <artifactId>mapletree</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <!-- END Shaded -->
-        <!--suppress VulnerableLibrariesLocal -->
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.19.3-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-            <classifier>remapped-mojang</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.thegatesdev</groupId>
-            <artifactId>eventador</artifactId>
-            <version>1.4.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.thegatesdev</groupId>
-            <artifactId>threshold</artifactId>
-            <version>0.2</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 </project>
