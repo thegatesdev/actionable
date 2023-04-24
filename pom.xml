@@ -26,7 +26,8 @@
         <dependency>
             <groupId>com.github.thegatesdev</groupId>
             <artifactId>mapletree</artifactId>
-            <version>v1.1</version>
+            <!--suppress MavenModelInspection -->
+            <version>-SNAPSHOT</version>
         </dependency>
         <!-- END Shaded -->
         <!--suppress VulnerableLibrariesLocal -->
@@ -113,7 +114,8 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
-                                    <include>io.github.thegatesdev:mapletree</include>
+                                    <include>com.github.thegatesdev:mapletree</include>
+                                    <include>com.github.thegatesdev:maple</include>
                                 </includes>
                             </artifactSet>
                             <filters>
