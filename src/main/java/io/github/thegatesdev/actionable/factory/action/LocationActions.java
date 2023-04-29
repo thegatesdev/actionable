@@ -6,13 +6,9 @@ import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.state.BlockState;
+import io.github.thegatesdev.threshold.world.WorldModification;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R2.block.data.CraftBlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
@@ -52,25 +48,23 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
         ));
 
         register(new ActionFactory<>("fill", (data, location) -> {
-            World world = location.getWorld();
+            final World world = location.getWorld();
             if (world == null) return;
             final Material material = data.getUnsafe("block_type");
             final Vector loc = location.toVector();
-            final Vector from = data.get("from", Vector.class).clone().add(loc);
-            final Vector to = data.get("to", Vector.class).clone().add(loc);
-            Iterable<BlockPos> positions = BlockPos.betweenClosed(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ());
-            BlockState blockData = ((CraftBlockData) material.createBlockData()).getState();
-            ServerLevel handle = ((CraftWorld) world).getHandle();
-            positions.forEach(blockPos -> handle.setBlock(blockPos, blockData, 3));
+            final Vector from = data.<Vector>getUnsafe("from").clone().add(loc);
+            final Vector to = data.<Vector>getUnsafe("to").clone().add(loc);
+            final var mod = WorldModification.sync(world);
+            mod.fill(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), material);
         }, new ReadableOptions()
                 .add(List.of("from", "to"), Actionable.VECTOR)
                 .add("block_type", Readable.enumeration(Material.class))
         ));
 
         register(new ActionFactory<>("set_block", (data, location) -> {
-            World world = location.getWorld();
+            final World world = location.getWorld();
             if (world == null) return;
-            ((CraftWorld) world).getHandle().setBlock(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()), ((CraftBlockData) ((Material) data.getUnsafe("block_type")).createBlockData()).getState(), 3);
+            world.getBlockAt(location).setType(data.getUnsafe("block_type"));
         }, new ReadableOptions().add("block_type", Readable.enumeration(Material.class))));
 
         register(new ActionFactory<>("particle", (data, location) -> {
