@@ -1,7 +1,8 @@
-name: Actionable
-version: '${project.version}'
+name: $name
+version: $version
 author: TheGatesDev
-api-version: 1.19
+api-version: $apiVersion
+description: $description
 main: io.github.thegatesdev.actionable.Actionable
 depend:
   - Eventador
