@@ -11,7 +11,6 @@ import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.threshold.Threshold;
-import org.bukkit.ChatColor;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -59,7 +58,7 @@ public final class EntityActions extends FactoryRegistry<Consumer<Entity>, Actio
                 .add("action", Factories.ENTITY_LOCATION_ACTION)
         ));
 
-        register(new ActionFactory<>("send_message", (data, entity) -> entity.sendMessage(ChatColor.translateAlternateColorCodes('&', data.getString("message"))), new ReadableOptions()
+        register(new ActionFactory<>("send_message", (data, entity) -> entity.sendRichMessage(data.getString("message")), new ReadableOptions()
                 .add("message", Readable.string())
         ));
 
@@ -179,12 +178,9 @@ public final class EntityActions extends FactoryRegistry<Consumer<Entity>, Actio
             if (offset != null) location.add(offset);
             final World world = entity.getWorld();
             final RayTraceResult rayResult = switch (rayType) {
-                case ENTITY ->
-                        world.rayTraceEntities(location, location.getDirection(), maxDistance, data.getDouble("ray_size"), entityPredicate);
-                case BLOCK ->
-                        world.rayTraceBlocks(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false);
-                case BOTH ->
-                        world.rayTrace(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false, data.getDouble("ray_size"), entityPredicate);
+                case ENTITY -> world.rayTraceEntities(location, location.getDirection(), maxDistance, data.getDouble("ray_size"), entityPredicate);
+                case BLOCK -> world.rayTraceBlocks(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false);
+                case BOTH -> world.rayTrace(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false, data.getDouble("ray_size"), entityPredicate);
                 default -> null;
             };
 

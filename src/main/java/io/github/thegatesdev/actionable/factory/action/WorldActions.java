@@ -7,7 +7,7 @@ import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -31,8 +31,7 @@ public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionF
         register(ActionFactory.loopWhileFactory(Factories.WORLD_ACTION, Factories.WORLD_CONDITION));
 
         register(new ActionFactory<>("broadcast_message", (data, world) -> {
-            for (Player player : world.getPlayers())
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', data.getString("message")));
+            world.sendMessage(MiniMessage.miniMessage().deserialize(data.getString("message")));
         }, new ReadableOptions().add("message", Readable.primitive(String.class))));
 
         register(new ActionFactory<>("each_player", (data, world) -> {
