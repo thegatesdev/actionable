@@ -1,6 +1,5 @@
 package io.github.thegatesdev.actionable.factory.action;
 
-import io.github.thegatesdev.actionable.Actionable;
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
@@ -16,6 +15,7 @@ import org.bukkit.util.Vector;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static io.github.thegatesdev.actionable.Actionable.VECTOR;
 import static io.github.thegatesdev.actionable.Factories.*;
 
 public final class LocationActions extends FactoryRegistry<Consumer<Location>, ActionFactory<Location>> {
@@ -28,7 +28,7 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
         register(ActionFactory.multipleFactory(LOCATION_ACTION));
         register(ActionFactory.ifElseFactory(LOCATION_CONDITION, LOCATION_ACTION));
 
-        register(new ActionFactory<>("move", (data, location) -> location.add((data.<Vector>getUnsafe("direction"))), new ReadableOptions().add("direction", Actionable.VECTOR)));
+        register(new ActionFactory<>("move", (data, location) -> location.add((data.<Vector>getUnsafe("direction"))), new ReadableOptions().add("direction", VECTOR)));
 
         register(new ActionFactory<>("run_world_action", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
                 .add("action", WORLD_ACTION)
@@ -57,7 +57,7 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
             final var mod = WorldModification.sync(world);
             mod.fill(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), material);
         }, new ReadableOptions()
-                .add(List.of("from", "to"), Actionable.VECTOR)
+                .add(List.of("from", "to"), VECTOR)
                 .add("block_type", Readable.enumeration(Material.class))
         ));
 
@@ -87,7 +87,7 @@ public final class LocationActions extends FactoryRegistry<Consumer<Location>, A
                 .add("material", Readable.enumeration(Material.class))
                 .add("amount", Readable.number(), 1)
                 .add("speed", Readable.number(), 1d)
-                .add(List.of("offset", "vector"), Actionable.VECTOR, new Vector(0, 0, 0))
+                .add(List.of("offset", "vector"), VECTOR, new Vector(0, 0, 0))
         ));
 
         register(new ActionFactory<>("summon_mob", (data, location) -> {

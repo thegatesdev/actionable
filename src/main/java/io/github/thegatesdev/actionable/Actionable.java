@@ -2,7 +2,10 @@ package io.github.thegatesdev.actionable;
 
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.exception.ElementException;
+import io.github.thegatesdev.mapletree.data.DataType;
 import io.github.thegatesdev.mapletree.data.Readable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -53,4 +56,7 @@ public class Actionable extends JavaPlugin {
             throw new ElementException(element, "Expected a map with x y z, a list with 3 or less elements, or a number");
         }
     }).info(info -> info.description("A vector represents a 3 dimensional point, with x, y and z number values.").representation("A map with x y and z values, a list with 1 or more values or a single value."));
+
+    public static final DataType<Component> COLORED_STRING = Readable.single("colored_text", Component.class, primitive -> MiniMessage.miniMessage().deserialize(primitive.stringValue()))
+            .info(info -> info.description("Text that can be formatted with MiniMessage formatting"));
 }

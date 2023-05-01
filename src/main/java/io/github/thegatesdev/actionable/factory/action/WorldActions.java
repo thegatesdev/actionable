@@ -1,13 +1,10 @@
 package io.github.thegatesdev.actionable.factory.action;
 
-import io.github.thegatesdev.actionable.Actionable;
-import io.github.thegatesdev.actionable.Factories;
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -18,6 +15,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static io.github.thegatesdev.actionable.Actionable.COLORED_STRING;
+import static io.github.thegatesdev.actionable.Actionable.VECTOR;
+import static io.github.thegatesdev.actionable.Factories.*;
+
 public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionFactory<World>> {
     public WorldActions(String id) {
         super(id, Identifiable::id);
@@ -25,14 +26,12 @@ public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionF
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.multipleFactory(Factories.WORLD_ACTION));
-        register(ActionFactory.ifElseFactory(Factories.WORLD_CONDITION, Factories.WORLD_ACTION));
-        register(ActionFactory.loopFactory(Factories.WORLD_ACTION));
-        register(ActionFactory.loopWhileFactory(Factories.WORLD_ACTION, Factories.WORLD_CONDITION));
+        register(ActionFactory.multipleFactory(WORLD_ACTION));
+        register(ActionFactory.ifElseFactory(WORLD_CONDITION, WORLD_ACTION));
+        register(ActionFactory.loopFactory(WORLD_ACTION));
+        register(ActionFactory.loopWhileFactory(WORLD_ACTION, WORLD_CONDITION));
 
-        register(new ActionFactory<>("broadcast_message", (data, world) -> {
-            world.sendMessage(MiniMessage.miniMessage().deserialize(data.getString("message")));
-        }, new ReadableOptions().add("message", Readable.primitive(String.class))));
+        register(new ActionFactory<>("broadcast_message", (data, world) -> world.sendMessage(data.getUnsafe("message")), new ReadableOptions().add("message", COLORED_STRING)));
 
         register(new ActionFactory<>("each_player", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -45,8 +44,8 @@ public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionF
                     if (condition.test(player)) action.accept(player);
                 }
         }, new ReadableOptions()
-                .add("action", Factories.ENTITY_ACTION)
-                .add("condition", Factories.ENTITY_CONDITION, null)
+                .add("action", ENTITY_ACTION)
+                .add("condition", ENTITY_CONDITION, null)
         ));
         register(new ActionFactory<>("each_entity", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -60,14 +59,14 @@ public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionF
                     if (condition.test(entity)) action.accept(entity);
                 }
         }, new ReadableOptions()
-                .add("action", Factories.ENTITY_ACTION)
-                .add("condition", Factories.ENTITY_CONDITION, null)
+                .add("action", ENTITY_ACTION)
+                .add("condition", ENTITY_CONDITION, null)
                 .add("living", Readable.bool(), false)
         ));
 
         register(new ActionFactory<>("location_action_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()
-                .add("location", Actionable.VECTOR)
-                .add("action", Factories.LOCATION_ACTION)
+                .add("location", VECTOR)
+                .add("action", LOCATION_ACTION)
         ));
     }
 }

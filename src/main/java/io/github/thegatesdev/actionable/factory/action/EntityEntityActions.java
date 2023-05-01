@@ -1,6 +1,5 @@
 package io.github.thegatesdev.actionable.factory.action;
 
-import io.github.thegatesdev.actionable.Factories;
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.mapletree.data.Readable;
@@ -14,6 +13,8 @@ import org.bukkit.util.Vector;
 
 import java.util.function.Consumer;
 
+import static io.github.thegatesdev.actionable.Factories.*;
+
 public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Entity, Entity>>, ActionFactory<Twin<Entity, Entity>>> {
     public EntityEntityActions(String id) {
         super(id, Identifiable::id);
@@ -21,12 +22,12 @@ public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Ent
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.multipleFactory(Factories.ENTITY_ENTITY_ACTION));
-        register(ActionFactory.ifElseFactory(Factories.ENTITY_ENTITY_CONDITION, Factories.ENTITY_ENTITY_ACTION));
-        register(ActionFactory.flippedFactory(Factories.ENTITY_ENTITY_ACTION));
-        register(ActionFactory.splitFactory(Factories.ENTITY_ACTION, Factories.ENTITY_ACTION));
-        register(ActionFactory.loopFactory(Factories.ENTITY_ENTITY_ACTION));
-        register(ActionFactory.loopWhileFactory(Factories.ENTITY_ENTITY_ACTION, Factories.ENTITY_ENTITY_CONDITION));
+        register(ActionFactory.multipleFactory(ENTITY_ENTITY_ACTION));
+        register(ActionFactory.ifElseFactory(ENTITY_ENTITY_CONDITION, ENTITY_ENTITY_ACTION));
+        register(ActionFactory.flippedFactory(ENTITY_ENTITY_ACTION));
+        register(ActionFactory.splitFactory(ENTITY_ACTION, ENTITY_ACTION));
+        register(ActionFactory.loopFactory(ENTITY_ENTITY_ACTION));
+        register(ActionFactory.loopWhileFactory(ENTITY_ENTITY_ACTION, ENTITY_ENTITY_CONDITION));
 
         register(new ActionFactory<>("launch_target", (data, twin) -> {
             final double amount = data.getDouble("amount");
@@ -44,7 +45,7 @@ public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Ent
                 .add("set", Readable.bool(), false)
         ));
 
-        register(new ActionFactory<>("run_entity_location_action", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", Factories.ENTITY_LOCATION_ACTION)));
+        register(new ActionFactory<>("run_entity_location_action", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", ENTITY_LOCATION_ACTION)));
 
         register(new ActionFactory<>("attack_target", (data, twin) -> {
             if (twin.actor() instanceof LivingEntity lv) lv.attack(twin.target());
