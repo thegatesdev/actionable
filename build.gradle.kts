@@ -25,7 +25,7 @@ dependencies {
     compileOnly("io.github.thegatesdev:threshold:0.2")
 }
 
-tasks{
+tasks {
     processResources {
         filteringCharset = Charsets.UTF_8.name()
         val props = mapOf(
@@ -45,15 +45,15 @@ tasks{
         options.release.set(17)
     }
 
-    shadowJar{
+    shadowJar {
         minimize()
-        dependencies{
+        dependencies {
             include(dependency("com.github.thegatesdev:mapletree"))
         }
     }
 
     register<Copy>("copyJarToLocalServer") {
-        from(jar)
+        from(shadowJar)
         into("D:\\Coding\\Minecraft\\SERVER\\plugins")
     }
 }
