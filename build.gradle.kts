@@ -51,4 +51,9 @@ tasks {
             include(dependency("com.github.thegatesdev:mapletree"))
         }
     }
+
+    register<Copy>("pluginJar"){
+        from(shadowJar)
+        into(buildDir.resolve("pluginJar"))
+    }
 }
