@@ -51,9 +51,4 @@ tasks {
             include(dependency("com.github.thegatesdev:mapletree"))
         }
     }
-
-    register<Copy>("copyJarToLocalServer") {
-        from(shadowJar)
-        into("D:\\Coding\\Minecraft\\SERVER\\plugins")
-    }
 }
