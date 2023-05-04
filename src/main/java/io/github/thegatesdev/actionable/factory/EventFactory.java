@@ -124,9 +124,8 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
                 for (int i = 0, staticActionsSize = staticActions.size(); i < staticActionsSize; i++)
                     staticActions.get(i).accept(data, event);
             // Run performer actions
-            if (!actionPerformers.isEmpty())
-                for (int i = 0, actionPerformersSize = actionPerformers.size(); i < actionPerformersSize; i++)
-                    actionPerformers.get(i).accept(event);
+            for (int i = 0, actionPerformersSize = actionPerformers.size(); i < actionPerformersSize; i++)
+                actionPerformers.get(i).accept(event);
         }
 
         public void cancelEvent(boolean cancelEvent) {
