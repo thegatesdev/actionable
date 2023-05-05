@@ -20,7 +20,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
 
-    api("com.github.thegatesdev:mapletree:-SNAPSHOT")
+    api("io.github.thegatesdev:mapletree:1.1")
     compileOnly("io.github.thegatesdev:eventador:1.4.2")
     compileOnly("io.github.thegatesdev:threshold:0.2")
 }
