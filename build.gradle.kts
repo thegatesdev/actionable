@@ -49,6 +49,7 @@ tasks {
         minimize()
         dependencies {
             include(dependency("io.github.thegatesdev:mapletree"))
+            include(dependency("com.github.thegatesdev:maple"))
         }
     }
 
