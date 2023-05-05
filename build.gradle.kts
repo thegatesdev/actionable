@@ -48,7 +48,7 @@ tasks {
     shadowJar {
         minimize()
         dependencies {
-            include(dependency("com.github.thegatesdev:mapletree"))
+            include(dependency("io.github.thegatesdev:mapletree"))
         }
     }
 
