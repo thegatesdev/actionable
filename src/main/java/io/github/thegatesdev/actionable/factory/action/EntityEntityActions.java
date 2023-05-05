@@ -18,6 +18,7 @@ import static io.github.thegatesdev.actionable.Factories.*;
 public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Entity, Entity>>, ActionFactory<Twin<Entity, Entity>>> {
     public EntityEntityActions(String id) {
         super(id, Identifiable::id);
+        info().description("An action executed on an actor and a target entity.");
     }
 
     @Override

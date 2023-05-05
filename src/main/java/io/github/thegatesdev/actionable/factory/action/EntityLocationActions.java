@@ -18,6 +18,7 @@ import static io.github.thegatesdev.actionable.Factories.*;
 public final class EntityLocationActions extends FactoryRegistry<Consumer<Twin<Entity, Location>>, ActionFactory<Twin<Entity, Location>>> {
     public EntityLocationActions(String id) {
         super(id, Identifiable::id);
+        info().description("An action executed on an actor entity and a target location.");
     }
 
     @Override

@@ -16,6 +16,7 @@ import static io.github.thegatesdev.actionable.Factories.ENTITY_ENTITY_CONDITION
 public final class EntityEntityConditions extends FactoryRegistry<Predicate<Twin<Entity, Entity>>, ConditionFactory<Twin<Entity, Entity>>> {
     public EntityEntityConditions(String id) {
         super(id, Identifiable::id);
+        info().description("A condition tested between an actor and a target entity.");
     }
 
     @Override

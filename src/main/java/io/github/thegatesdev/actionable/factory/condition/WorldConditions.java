@@ -12,6 +12,7 @@ import static io.github.thegatesdev.actionable.Factories.WORLD_CONDITION;
 public final class WorldConditions extends FactoryRegistry<Predicate<World>, ConditionFactory<World>> {
     public WorldConditions(String id) {
         super(id, Identifiable::id);
+        info().description("A condition tested on a world.");
     }
 
     @Override

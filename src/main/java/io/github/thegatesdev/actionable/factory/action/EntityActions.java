@@ -32,6 +32,7 @@ import static io.github.thegatesdev.actionable.Factories.*;
 public final class EntityActions extends FactoryRegistry<Consumer<Entity>, ActionFactory<Entity>> {
     public EntityActions(String id) {
         super(id, ActionFactory::id);
+        info().description("An action executed on a single entity.");
     }
 
     @Override

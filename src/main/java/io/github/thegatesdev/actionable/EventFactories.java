@@ -30,6 +30,7 @@ public class EventFactories implements Identifiable, DataTypeHolder<EventFactory
                 throw new ElementException(data, "Specified event %s does not exist".formatted(s));
             return factory.build(data);
         });
+        dataType.info().description("Multiple actions and conditions that can be executed when an event happens.");
     }
 
     // -- FACTORY GETTERS

@@ -15,6 +15,7 @@ import static io.github.thegatesdev.actionable.Factories.ENTITY_CONDITION;
 public final class EntityConditions extends FactoryRegistry<Predicate<Entity>, ConditionFactory<Entity>> {
     public EntityConditions(String id) {
         super(id, Identifiable::id);
+        info().description("A condition tested on a single entity.");
     }
 
     @Override

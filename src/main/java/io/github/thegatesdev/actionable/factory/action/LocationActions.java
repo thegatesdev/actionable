@@ -21,6 +21,7 @@ import static io.github.thegatesdev.actionable.Factories.*;
 public final class LocationActions extends FactoryRegistry<Consumer<Location>, ActionFactory<Location>> {
     public LocationActions(String id) {
         super(id, Identifiable::id);
+        info().description("An action executed at a location in a world.");
     }
 
     @Override

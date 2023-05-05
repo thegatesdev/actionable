@@ -14,6 +14,7 @@ import static io.github.thegatesdev.actionable.Factories.*;
 public final class EntityLocationConditions extends FactoryRegistry<Predicate<Twin<Entity, Location>>, ConditionFactory<Twin<Entity, Location>>> {
     public EntityLocationConditions(String id) {
         super(id, Identifiable::id);
+        info().description("A condition tested between an actor entity and a target location.");
     }
 
     @Override

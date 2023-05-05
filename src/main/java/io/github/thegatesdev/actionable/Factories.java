@@ -3,27 +3,27 @@ package io.github.thegatesdev.actionable;
 import io.github.thegatesdev.actionable.factory.action.*;
 import io.github.thegatesdev.actionable.factory.condition.*;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
-import io.github.thegatesdev.mapletree.registry.core.BasicRegistry;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 public class Factories {
     private static boolean locked = false;
 
-    private static final BasicRegistry<String, FactoryRegistry<?, ?>> FACTORY_REGISTRIES = new BasicRegistry<>();
+    private static final Map<String, FactoryRegistry<?, ?>> FACTORY_REGISTRIES = new HashMap<>();
+    private static final Map<String, FactoryRegistry<?, ?>> VIEW = Collections.unmodifiableMap(FACTORY_REGISTRIES);
 
     public static <F extends FactoryRegistry<?, ?>> F add(F f) {
-        FACTORY_REGISTRIES.register(f.id(), f);
+        if (locked) throw new RuntimeException("Factories are locked");
+        FACTORY_REGISTRIES.putIfAbsent(f.id(), f);
         return f;
     }
 
     public static Set<String> keys() {
-        return FACTORY_REGISTRIES.keySet();
+        return VIEW.keySet();
     }
 
     public static Collection<FactoryRegistry<?, ?>> values() {
-        return FACTORY_REGISTRIES.back().values();
+        return VIEW.values();
     }
 
     public static FactoryRegistry<?, ?> get(String key) {
@@ -31,15 +31,12 @@ public class Factories {
     }
 
     static void lock() {
-        FACTORY_REGISTRIES.lock();
         locked = true;
     }
 
     static void registerAll() {
-        if (locked) throw new RuntimeException("locked");
-        for (final FactoryRegistry<?, ?> staticRegistration : FACTORY_REGISTRIES.back().values()) {
-            staticRegistration.registerStatic();
-        }
+        if (locked) throw new RuntimeException("Factories are locked");
+        for (final FactoryRegistry<?, ?> staticRegistration : FACTORY_REGISTRIES.values()) staticRegistration.registerStatic();
     }
 
     public static final EntityActions ENTITY_ACTION = add(new EntityActions("entity_action"));

@@ -15,6 +15,7 @@ import static io.github.thegatesdev.actionable.Factories.LOCATION_CONDITION;
 public final class LocationConditions extends FactoryRegistry<Predicate<Location>, ConditionFactory<Location>> {
     public LocationConditions(String id) {
         super(id, Identifiable::id);
+        info().description("A condition tested on a location in a world.");
     }
 
     @Override

@@ -22,6 +22,7 @@ import static io.github.thegatesdev.actionable.Factories.*;
 public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionFactory<World>> {
     public WorldActions(String id) {
         super(id, Identifiable::id);
+        info().description("An action executed on a world.");
     }
 
     @Override
