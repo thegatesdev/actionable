@@ -14,15 +14,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Actionable extends JavaPlugin {
-
-    @Override
-    public void onEnable() {
-        Factories.lock();
-    }
-
     @Override
     public void onLoad() {
         Factories.registerAll();
+        Factories.lock();
     }
 
     public static final Readable<PotionEffectType> EFFECT_TYPE = Readable.single("potion_effect", PotionEffectType.class, primitive -> {
@@ -32,7 +27,7 @@ public class Actionable extends JavaPlugin {
                     throw new ElementException(primitive, "effect '%s' does not exist!".formatted(effectName));
                 return byName;
             })
-            .info(info -> info.representation("Possible values: " + String.join(", ", Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toArray(String[]::new))));
+            .info(info -> info.possibleValues(Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toList()));
     public static final Readable<Vector> VECTOR = new Readable<>("vector", Vector.class, element -> {
         if (element.isMap()) {
             final DataMap map = element.asMap();
