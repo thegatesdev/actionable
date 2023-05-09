@@ -3,10 +3,10 @@ package io.github.thegatesdev.actionable;
 import io.github.thegatesdev.actionable.factory.EventFactory;
 import io.github.thegatesdev.eventador.core.EventType;
 import io.github.thegatesdev.eventador.core.EventTypes;
+import io.github.thegatesdev.maple.data.DataElement;
+import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.exception.ElementException;
 import io.github.thegatesdev.mapletree.data.DataType;
-import io.github.thegatesdev.mapletree.data.DataTypeHolder;
-import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
 import org.bukkit.event.Event;
 
@@ -14,23 +14,14 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class EventFactories implements Identifiable, DataTypeHolder<EventFactory<?>.ReadPerformers> {
+public class EventFactories implements Identifiable, DataType<EventFactory<?>.ReadPerformers> {
     private final Map<EventType<?>, EventFactory<?>> classMapped = new HashMap<>();
     private final Map<Class<? extends Event>, List<?>> factoriesOfCache = new HashMap<>();
     protected final EventTypes eventTypes;
 
-    private final Readable<EventFactory<?>.ReadPerformers> dataType;
-
     public EventFactories(EventTypes eventTypes) {
         this.eventTypes = eventTypes;
-        dataType = Readable.map("event", data -> {
-            final String s = data.getString("type");
-            final EventFactory<?> factory = getFactory(s);
-            if (factory == null)
-                throw new ElementException(data, "Specified event %s does not exist".formatted(s));
-            return factory.build(data);
-        });
-        dataType.info().description("Multiple actions and conditions that can be executed when an event happens.");
+        info().description("Multiple actions and conditions that can be executed when an event happens.");
     }
 
     // -- FACTORY GETTERS
@@ -83,13 +74,19 @@ public class EventFactories implements Identifiable, DataTypeHolder<EventFactory
         return list;
     }
 
-    @Override
-    public final DataType<EventFactory<?>.ReadPerformers> dataType() {
-        return dataType;
-    }
 
     @Override
     public final String id() {
         return "event";
+    }
+
+    @Override
+    public EventFactory<?>.ReadPerformers read(DataElement element) {
+        var map = element.requireOf(DataMap.class);
+        String type = map.getString("type");
+        var factory = getFactory(type);
+        if (factory == null)
+            throw new ElementException(map, "Specified event %s does not exist".formatted(type));
+        return factory.build(map);
     }
 }
