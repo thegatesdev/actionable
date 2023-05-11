@@ -3,6 +3,7 @@ package io.github.thegatesdev.actionable;
 import io.github.thegatesdev.actionable.factory.action.*;
 import io.github.thegatesdev.actionable.factory.condition.*;
 import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 
 import java.util.*;
 
@@ -14,7 +15,8 @@ public class Factories {
 
     public static <F extends FactoryRegistry<?, ?>> F add(F f) {
         if (locked) throw new RuntimeException("Factories are locked");
-        FACTORY_REGISTRIES.putIfAbsent(f.id(), f);
+        if (FACTORY_REGISTRIES.putIfAbsent(f.id(), f) != null)
+            throw new RuntimeException("Duplicate factory entry " + f.id());
         return f;
     }
 
@@ -36,7 +38,8 @@ public class Factories {
 
     static void registerAll() {
         if (locked) throw new RuntimeException("Factories are locked");
-        for (final FactoryRegistry<?, ?> staticRegistration : FACTORY_REGISTRIES.values()) staticRegistration.registerStatic();
+        for (final FactoryRegistry<?, ?> factoryRegistry : FACTORY_REGISTRIES.values())
+            if (factoryRegistry instanceof StaticFactoryRegistry<?, ?> stat) stat.registerStatic();
     }
 
     public static final EntityActions ENTITY_ACTION = add(new EntityActions("entity_action"));

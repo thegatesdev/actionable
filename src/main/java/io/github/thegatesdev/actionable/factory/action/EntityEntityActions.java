@@ -4,8 +4,8 @@ import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 import static io.github.thegatesdev.actionable.Factories.*;
 
-public final class EntityEntityActions extends FactoryRegistry<Consumer<Twin<Entity, Entity>>, ActionFactory<Twin<Entity, Entity>>> {
+public final class EntityEntityActions extends StaticFactoryRegistry<Consumer<Twin<Entity, Entity>>, ActionFactory<Twin<Entity, Entity>>> {
     public EntityEntityActions(String id) {
         super(id, Identifiable::id);
         info().description("An action executed on an actor and a target entity.");

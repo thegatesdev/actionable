@@ -3,8 +3,8 @@ package io.github.thegatesdev.actionable.factory.action;
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
 import static io.github.thegatesdev.actionable.Factories.*;
 
-public final class EntityLocationActions extends FactoryRegistry<Consumer<Twin<Entity, Location>>, ActionFactory<Twin<Entity, Location>>> {
+public final class EntityLocationActions extends StaticFactoryRegistry<Consumer<Twin<Entity, Location>>, ActionFactory<Twin<Entity, Location>>> {
     public EntityLocationActions(String id) {
         super(id, Identifiable::id);
         info().description("An action executed on an actor entity and a target location.");

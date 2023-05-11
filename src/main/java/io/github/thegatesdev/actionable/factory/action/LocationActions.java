@@ -3,8 +3,8 @@ package io.github.thegatesdev.actionable.factory.action;
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import io.github.thegatesdev.threshold.world.WorldModification;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
 import static io.github.thegatesdev.actionable.Factories.*;
 
-public final class LocationActions extends FactoryRegistry<Consumer<Location>, ActionFactory<Location>> {
+public final class LocationActions extends StaticFactoryRegistry<Consumer<Location>, ActionFactory<Location>> {
     public LocationActions(String id) {
         super(id, Identifiable::id);
         info().description("An action executed at a location in a world.");

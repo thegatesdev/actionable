@@ -3,8 +3,8 @@ package io.github.thegatesdev.actionable.factory.condition;
 import io.github.thegatesdev.actionable.factory.ConditionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Factories.ENTITY_CONDITION;
 
-public final class EntityConditions extends FactoryRegistry<Predicate<Entity>, ConditionFactory<Entity>> {
+public final class EntityConditions extends StaticFactoryRegistry<Predicate<Entity>, ConditionFactory<Entity>> {
     public EntityConditions(String id) {
         super(id, Identifiable::id);
         info().description("A condition tested on a single entity.");

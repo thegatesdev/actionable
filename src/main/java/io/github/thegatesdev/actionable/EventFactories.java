@@ -6,20 +6,20 @@ import io.github.thegatesdev.eventador.core.EventTypes;
 import io.github.thegatesdev.maple.data.DataElement;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.exception.ElementException;
-import io.github.thegatesdev.mapletree.data.DataType;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class EventFactories implements Identifiable, DataType<EventFactory<?>.ReadPerformers> {
+public class EventFactories extends FactoryRegistry<EventFactory<?>.ReadPerformers, EventFactory<?>> {
     private final Map<EventType<?>, EventFactory<?>> classMapped = new HashMap<>();
     private final Map<Class<? extends Event>, List<?>> factoriesOfCache = new HashMap<>();
     protected final EventTypes eventTypes;
 
     public EventFactories(EventTypes eventTypes) {
+        super("event");
         this.eventTypes = eventTypes;
         info().description("Multiple actions and conditions that can be executed when an event happens.");
     }
@@ -27,13 +27,13 @@ public class EventFactories implements Identifiable, DataType<EventFactory<?>.Re
     // -- FACTORY GETTERS
 
     @SuppressWarnings("unchecked")
-    public final <E extends Event> EventFactory<E> getFactory(EventType<E> eventType) {
+    public final <E extends Event> EventFactory<E> get(EventType<E> eventType) {
         if (eventType == null) return null;
         return (EventFactory<E>) classMapped.computeIfAbsent(eventType, (t) -> new EventFactory<>(eventType));
     }
 
-    public final EventFactory<?> getFactory(String eventId) {
-        return getFactory(eventTypes.get(eventId));
+    public final EventFactory<?> get(String eventId) {
+        return get(eventTypes.get(eventId));
     }
 
     // -- MASS ACTION
@@ -54,7 +54,7 @@ public class EventFactories implements Identifiable, DataType<EventFactory<?>.Re
         }
         output = new ArrayList<>(types.size());
         for (EventType<?> type : types)
-            output.add((EventFactory<? extends E>) getFactory(type));
+            output.add((EventFactory<? extends E>) get(type));
         final var nomod = Collections.unmodifiableList(output);
         factoriesOfCache.put(baseEventClass, nomod);
         return nomod;
@@ -84,7 +84,7 @@ public class EventFactories implements Identifiable, DataType<EventFactory<?>.Re
     public EventFactory<?>.ReadPerformers read(DataElement element) {
         var map = element.requireOf(DataMap.class);
         String type = map.getString("type");
-        var factory = getFactory(type);
+        var factory = get(type);
         if (factory == null)
             throw new ElementException(map, "Specified event %s does not exist".formatted(type));
         return factory.build(map);

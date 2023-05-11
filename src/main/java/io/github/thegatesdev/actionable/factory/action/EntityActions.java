@@ -7,7 +7,7 @@ import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.maple.data.DataPrimitive;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import io.github.thegatesdev.threshold.Threshold;
 import net.kyori.adventure.text.Component;
 import org.bukkit.FluidCollisionMode;
@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 import static io.github.thegatesdev.actionable.Actionable.*;
 import static io.github.thegatesdev.actionable.Factories.*;
 
-public final class EntityActions extends FactoryRegistry<Consumer<Entity>, ActionFactory<Entity>> {
+public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>, ActionFactory<Entity>> {
     public EntityActions(String id) {
         super(id, ActionFactory::id);
         info().description("An action executed on a single entity.");

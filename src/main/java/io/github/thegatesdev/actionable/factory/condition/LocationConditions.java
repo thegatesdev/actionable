@@ -3,8 +3,8 @@ package io.github.thegatesdev.actionable.factory.condition;
 import io.github.thegatesdev.actionable.factory.ConditionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Factories.LOCATION_CONDITION;
 
-public final class LocationConditions extends FactoryRegistry<Predicate<Location>, ConditionFactory<Location>> {
+public final class LocationConditions extends StaticFactoryRegistry<Predicate<Location>, ConditionFactory<Location>> {
     public LocationConditions(String id) {
         super(id, Identifiable::id);
         info().description("A condition tested on a location in a world.");

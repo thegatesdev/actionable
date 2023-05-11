@@ -3,8 +3,8 @@ package io.github.thegatesdev.actionable.factory.action;
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.mapletree.data.Readable;
 import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
 import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -19,7 +19,7 @@ import static io.github.thegatesdev.actionable.Actionable.COLORED_STRING;
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
 import static io.github.thegatesdev.actionable.Factories.*;
 
-public final class WorldActions extends FactoryRegistry<Consumer<World>, ActionFactory<World>> {
+public final class WorldActions extends StaticFactoryRegistry<Consumer<World>, ActionFactory<World>> {
     public WorldActions(String id) {
         super(id, Identifiable::id);
         info().description("An action executed on a world.");
