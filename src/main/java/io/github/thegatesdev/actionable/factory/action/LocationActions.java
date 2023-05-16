@@ -97,7 +97,7 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
             if (world == null) return;
             EntityType entityType = data.getUnsafe("entity_type");
             final Entity spawnedEntity = world.spawnEntity(location, entityType);
-            final Consumer<Entity> mobAction = data.getUnsafe("entity_action");
+            final Consumer<Entity> mobAction = data.getUnsafe("entity_action", null);
             if (mobAction != null) mobAction.accept(spawnedEntity);
         }, new ReadableOptions()
                 .add("entity_type", Readable.enumeration(EntityType.class))
