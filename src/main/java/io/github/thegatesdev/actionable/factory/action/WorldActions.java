@@ -65,7 +65,7 @@ public final class WorldActions extends StaticFactoryRegistry<Consumer<World>, A
                 .add("living", Readable.bool(), false)
         ));
 
-        register(new ActionFactory<>("location_action_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()
+        register(new ActionFactory<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()
                 .add("location", VECTOR)
                 .add("action", LOCATION_ACTION)
         ));

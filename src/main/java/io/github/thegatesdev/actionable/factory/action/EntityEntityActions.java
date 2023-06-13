@@ -46,7 +46,7 @@ public final class EntityEntityActions extends StaticFactoryRegistry<Consumer<Tw
                 .add("set", Readable.bool(), false)
         ));
 
-        register(new ActionFactory<>("run_entity_location_action", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", ENTITY_LOCATION_ACTION)));
+        register(new ActionFactory<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", ENTITY_LOCATION_ACTION)));
 
         register(new ActionFactory<>("attack_target", (data, twin) -> {
             if (twin.actor() instanceof LivingEntity lv) lv.attack(twin.target());

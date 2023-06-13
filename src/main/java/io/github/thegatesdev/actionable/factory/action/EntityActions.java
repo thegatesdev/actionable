@@ -42,23 +42,19 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
         register(ActionFactory.loopFactory(ENTITY_ACTION));
         register(ActionFactory.loopWhileFactory(ENTITY_ACTION, ENTITY_CONDITION));
 
-        register(new ActionFactory<>("run_location_action", (data, entity) -> {
+        register(new ActionFactory<>("run_here", (data, entity) -> {
             Vector offset = data.getUnsafe("offset");
-            if (data.getBoolean("relative")) offset = entity.getLocation().getDirection().multiply(offset);
-            data.<Consumer<Location>>getUnsafe("action").accept(entity.getLocation().add(offset));
+            var loc = entity.getLocation();
+            if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
+            data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(entity, loc.add(offset)));
         }, new ReadableOptions()
                 .add("offset", VECTOR, new Vector(0, 0, 0))
-                .add("action", LOCATION_ACTION)
+                .add("action", ENTITY_LOCATION_ACTION)
                 .add("relative", Readable.bool(), false)
         ));
 
-        register(new ActionFactory<>("run_world_action", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()
+        register(new ActionFactory<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()
                 .add("action", WORLD_ACTION)
-        ));
-
-        register(new ActionFactory<>("run_entity_location_action", (data, entity) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(entity, entity.getLocation().add(data.<Vector>getUnsafe("offset")))), new ReadableOptions()
-                .add("offset", VECTOR, new Vector(0, 0, 0))
-                .add("action", ENTITY_LOCATION_ACTION)
         ));
 
         register(new ActionFactory<>("send_message", (data, entity) -> entity.sendMessage(data.<Component>getUnsafe("message")), new ReadableOptions()
@@ -86,56 +82,56 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 final int slot = data.getInt("slot");
                 final ItemStack stack = humanEntity.getInventory().getItem(slot);
                 if (stack == null) return;
-                final Consumer<Twin<Entity, Entity>> droppedItemAction = data.getUnsafe("dropped_item_action", null);
+                final Consumer<Twin<Entity, Entity>> droppedItemAction = data.getUnsafe("drop_action", null);
                 humanEntity.getInventory().clear(slot);
                 final Item item = humanEntity.getWorld().dropItemNaturally(humanEntity.getLocation(), stack);
                 if (droppedItemAction != null) droppedItemAction.accept(Twin.of(entity, item));
             }
         }, new ReadableOptions()
                 .add("slot", Readable.integer())
-                .add("dropped_item_action", ENTITY_ENTITY_ACTION, null)
+                .add("drop_action", ENTITY_ENTITY_ACTION, null)
         ));
 
         register(new ActionFactory<>("velocity", (data, entity) -> {
             Vector dir = data.getUnsafe("direction");
             if (data.getBoolean("relative")) dir = entity.getLocation().getDirection().multiply(dir);
-            if (!data.getBoolean("add")) entity.setVelocity(dir);
+            if (data.getBoolean("set")) entity.setVelocity(dir);
             else entity.setVelocity(entity.getVelocity().add(dir));
         }, new ReadableOptions()
                 .add("direction", VECTOR)
-                .add("add", Readable.bool(), false)
+                .add("set", Readable.bool(), true)
                 .add("relative", Readable.bool(), false)
         ));
 
-        register(new ActionFactory<>("area_entity_action", (data, entity) -> {
+        register(new ActionFactory<>("run_in_area", (data, entity) -> {
             final Location location = entity.getLocation();
             final MutableTwin<Entity, Entity> twinCache = new MutableTwin<>(entity, null);
             final List<Entity> nearbyEntities;
             {
                 final Vector range = data.getUnsafe("range");
-                final Predicate<Twin<Entity, Entity>> entityPredicate = data.getUnsafe("entity_predicate");
+                final Predicate<Twin<Entity, Entity>> entityPredicate = data.getUnsafe("_pred");
                 nearbyEntities = new ArrayList<>(entity.getWorld().getNearbyEntities(location, range.getX(), range.getY(), range.getZ(), entity1 -> entityPredicate.test(twinCache.setTarget(entity1))));
             }
             if (nearbyEntities.isEmpty()) return;
             nearbyEntities.sort(Comparator.comparingDouble(o -> location.distanceSquared(o.getLocation())));
 
             final double maxEntities = data.getDouble("max_entities");
-            final Consumer<Twin<Entity, Entity>> hitAction = data.getUnsafe("entity_action");
+            final Consumer<Twin<Entity, Entity>> hitAction = data.getUnsafe("action");
             int i = 0;
             for (Entity nearbyEntity : nearbyEntities) {
                 hitAction.accept(twinCache.setTarget(nearbyEntity));
-                if (++i > maxEntities) break;
+                if (++i > maxEntities) return;
             }
         }, new ReadableOptions()
                 .add("range", VECTOR, new Vector(10, 10, 10))
                 .add("include_self", Readable.bool(), false)
                 .add("max_entities", Readable.integer(), 10)
-                .add("entity_condition", ENTITY_ENTITY_CONDITION, null)
-                .add("entity_action", ENTITY_ENTITY_ACTION)
-                .after("entity_predicate", data -> {
+                .add("condition", ENTITY_ENTITY_CONDITION, null)
+                .add("action", ENTITY_ENTITY_ACTION)
+                .after("_pred", data -> {
                     Predicate<Twin<Entity, Entity>> out = twin -> twin.actor().isValid() && twin.target().isValid();
                     if (!data.getBoolean("include_self")) out = out.and(twin -> !twin.areEqual());
-                    final Predicate<Twin<Entity, Entity>> entityCondition = data.getUnsafe("entity_condition", null);
+                    final Predicate<Twin<Entity, Entity>> entityCondition = data.getUnsafe("condition", null);
                     if (entityCondition != null) out = out.and(entityCondition);
                     return new DataPrimitive(out);
                 })
@@ -146,11 +142,11 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             if (data.getBoolean("relative")) entity.teleport(entity.getLocation().add(where));
             else entity.teleport(where.toLocation(entity.getWorld()));
         }, new ReadableOptions()
-                .add("relative", Readable.bool(), false)
                 .add("where", VECTOR)
+                .add("relative", Readable.bool(), false)
         ));
 
-        register(new ActionFactory<>("set_on_fire", (data, entity) -> {
+        register(new ActionFactory<>("set_fire", (data, entity) -> {
             final int fireTicks = data.getInt("ticks");
             if (data.getBoolean("force") || entity.getFireTicks() < fireTicks) entity.setFireTicks(fireTicks);
         }, new ReadableOptions()
@@ -159,14 +155,14 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
         ));
 
         register(new ActionFactory<>("raycast", (data, entity) -> {
-            final Consumer<Location> rayAction = data.getUnsafe("ray_action", null);
+            final Consumer<Twin<Entity, Location>> rayAction = data.getUnsafe("ray_action", null);
             final Consumer<Twin<Entity, Location>> hitAction = data.getUnsafe("hit_action", null);
             final Consumer<Twin<Entity, Location>> relativeHitAction = data.getUnsafe("relative_hit_action", null);
             final Consumer<Twin<Entity, Entity>> hitEntityAction = data.getUnsafe("hit_entity_action", null);
             final Predicate<Twin<Entity, Entity>> hitEntityCondition = data.getUnsafe("hit_entity_condition", null);
             if (rayAction == null && hitAction == null && hitEntityAction == null && hitEntityCondition == null && relativeHitAction == null)
                 return;
-            final RaycastType rayType = data.getUnsafe("ray_type");
+            final RaycastType rayType = data.getUnsafe("cast_type");
             final double maxDistance = data.getDouble("max_distance");
             final Vector offset = data.getUnsafe("offset", null);
             final double stepDistance = data.getDouble("step_distance");
@@ -184,7 +180,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 case ENTITY -> world.rayTraceEntities(location, location.getDirection(), maxDistance, data.getDouble("ray_size"), entityPredicate);
                 case BLOCK -> world.rayTraceBlocks(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false);
                 case BOTH -> world.rayTrace(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false, data.getDouble("ray_size"), entityPredicate);
-                default -> null;
+                case COSMETIC -> null;
             };
 
             final Vector hitPosition;
@@ -209,22 +205,19 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             if (rayAction != null) {
                 final Vector[] positions = Threshold.fromTo(location.toVector(), hitPosition, stepDistance);
                 final Location l = new Location(world, 0, 0, 0);
-                for (Vector position : positions) {
-                    l.setX(position.getX());
-                    l.setY(position.getY());
-                    l.setZ(position.getZ());
-                    rayAction.accept(l);
-                }
+                final var twin = new MutableTwin<Entity, Location>(entity, null);
+                for (Vector position : positions)
+                    rayAction.accept(twin.setTarget(l.set(position.getX(), position.getY(), position.getZ())));
             }
         }, new ReadableOptions()
-                .add(Readable.number(), Map.of("max_distance", 100d, "step_distance", 1d, "ray_size", 1d))
+                .add(Readable.number(), Map.of("max_distance", 100, "step_distance", 1, "ray_size", 1))
                 .add("offset", VECTOR, null)
-                .add("ray_action", LOCATION_ACTION, null)
+                .add("ray_action", ENTITY_LOCATION_ACTION, null)
                 .add("hit_action", ENTITY_LOCATION_ACTION, null)
                 .add("relative_hit_action", ENTITY_LOCATION_ACTION, null)
                 .add("hit_entity_action", ENTITY_ENTITY_ACTION, null)
                 .add("hit_entity_condition", ENTITY_ENTITY_CONDITION, null)
-                .add("ray_type", Readable.enumeration(RaycastType.class), RaycastType.BOTH)
+                .add("cast_type", Readable.enumeration(RaycastType.class), RaycastType.BOTH)
         ));
 
         register(new ActionFactory<>("damage", (data, entity) -> {
@@ -234,7 +227,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("amount", Readable.number(), 1)
         ));
 
-        register(new ActionFactory<>("apply_effect", (data, entity) -> {
+        register(new ActionFactory<>("effect", (data, entity) -> {
             final PotionEffectType type = data.getUnsafe("effect");
             if (entity instanceof LivingEntity livingEntity) {
                 if (data.getBoolean("remove"))
@@ -253,12 +246,12 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             final Entity vehicle = entity.getVehicle();
             if (vehicle != null) {
                 vehicle.removePassenger(entity);
-                var action = data.<Consumer<Entity>>getUnsafe("vehicle_action", null);
-                if (action != null) action.accept(vehicle);
+                var action = data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action", null);
+                if (action != null) action.accept(Twin.of(entity, vehicle));
             }
-        }, new ReadableOptions().add("vehicle_action", ENTITY_ACTION, null)));
+        }, new ReadableOptions().add("action", ENTITY_ENTITY_ACTION, null)));
 
-        register(new ActionFactory<>("vehicle_action", (data, entity) -> {
+        register(new ActionFactory<>("run_on_vehicle", (data, entity) -> {
             final Entity vehicle = entity.getVehicle();
             if (vehicle != null)
                 data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action").accept(Twin.of(entity, vehicle));

@@ -12,10 +12,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public final class ActionFactory<T> implements Identifiable, Factory<Consumer<T>>, ReadableOptionsHolder {
+public class ActionFactory<T> implements Identifiable, Factory<Consumer<T>>, ReadableOptionsHolder {
     private final String id;
-    private final BiConsumer<DataMap, T> effect;
-    private final ReadableOptions readableOptions;
+    protected final BiConsumer<DataMap, T> effect;
+    protected final ReadableOptions readableOptions;
 
     public ActionFactory(String id, BiConsumer<DataMap, T> effect, ReadableOptions readableOptions) {
         this.id = id;

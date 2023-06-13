@@ -38,13 +38,12 @@ public final class EntityLocationActions extends StaticFactoryRegistry<Consumer<
             twin.actor().setRotation(location.getYaw(), location.getPitch());
         }));
 
-        register(new ActionFactory<>("run_world_action", (data, twin) -> data.<Consumer<World>>getUnsafe("action").accept(twin.target().getWorld()), new ReadableOptions()
+        register(new ActionFactory<>("run_in_world", (data, twin) -> data.<Consumer<World>>getUnsafe("action").accept(twin.target().getWorld()), new ReadableOptions()
                 .add("action", WORLD_ACTION)
         ));
 
-        register(new ActionFactory<>("offset", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().clone().add(data.<Vector>getUnsafe("offset")))), new ReadableOptions()
-                .add("offset", VECTOR)
-                .add("action", ENTITY_LOCATION_ACTION)
+        register(new ActionFactory<>("run_at_target", (data, twin) -> data.<Consumer<Location>>getUnsafe("action").accept(twin.target()), new ReadableOptions()
+                .add("action", LOCATION_ACTION)
         ));
     }
 }

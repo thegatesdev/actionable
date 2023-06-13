@@ -27,8 +27,24 @@ public final class EntityConditions extends StaticFactoryRegistry<Predicate<Enti
                 new ReadableOptions().add("entity_type", Readable.enumeration(EntityType.class))
         ));
 
+        register(new ConditionFactory<>("sneaking", (data, entity) -> entity.isSneaking()));
+
+        register(new ConditionFactory<>("frozen", (data, entity) -> entity.isFrozen()));
+
         register(new ConditionFactory<>("on_ground", (data, entity) -> entity.isOnGround()));
 
         register(new ConditionFactory<>("in_water", (data, entity) -> entity.isInWater()));
+
+        register(new ConditionFactory<>("under_water", (data, entity) -> entity.isInWater()));
+
+        register(new ConditionFactory<>("in_rain", (data, entity) -> entity.isInWater()));
+
+        register(new ConditionFactory<>("in_lava", (data, entity) -> entity.isInWater()));
+
+        register(new ConditionFactory<>("in_powdered_snow", (data, entity) -> entity.isInWater()));
+
+        register(new ConditionFactory<>("has_passenger", (data, entity) -> !entity.isEmpty()));
+
+        register(new ConditionFactory<>("in_vehicle", (data, entity) -> entity.isInsideVehicle()));
     }
 }

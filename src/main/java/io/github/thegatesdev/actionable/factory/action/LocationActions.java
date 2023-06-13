@@ -28,10 +28,19 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
     public void registerStatic() {
         register(ActionFactory.multipleFactory(LOCATION_ACTION));
         register(ActionFactory.ifElseFactory(LOCATION_CONDITION, LOCATION_ACTION));
+        register(ActionFactory.loopFactory(LOCATION_ACTION));
+        register(ActionFactory.loopWhileFactory(LOCATION_ACTION, LOCATION_CONDITION));
 
-        register(new ActionFactory<>("move", (data, location) -> location.add((data.<Vector>getUnsafe("direction"))), new ReadableOptions().add("direction", VECTOR)));
+        register(new ActionFactory<>("move", (data, location) -> {
+            Vector dir = data.getUnsafe("direction");
+            if (data.getBoolean("relative")) dir = location.getDirection().multiply(dir);
+            location.add(dir);
+        }, new ReadableOptions()
+                .add("direction", VECTOR)
+                .add("relative", Readable.bool(), false)
+        ));
 
-        register(new ActionFactory<>("run_world_action", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
+        register(new ActionFactory<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
                 .add("action", WORLD_ACTION)
         ));
 
@@ -51,22 +60,23 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
         register(new ActionFactory<>("fill", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
-            final Material material = data.getUnsafe("block_type");
+            final Material material = data.getUnsafe("block");
             final Vector loc = location.toVector();
             final Vector from = data.<Vector>getUnsafe("from").clone().add(loc);
             final Vector to = data.<Vector>getUnsafe("to").clone().add(loc);
             final var mod = WorldModification.sync(world);
             mod.fill(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), material);
+            mod.update();
         }, new ReadableOptions()
                 .add(List.of("from", "to"), VECTOR)
-                .add("block_type", Readable.enumeration(Material.class))
+                .add("block", Readable.enumeration(Material.class))
         ));
 
         register(new ActionFactory<>("set_block", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
-            world.getBlockAt(location).setType(data.getUnsafe("block_type"));
-        }, new ReadableOptions().add("block_type", Readable.enumeration(Material.class))));
+            world.getBlockAt(location).setType(data.getUnsafe("block"));
+        }, new ReadableOptions().add("block", Readable.enumeration(Material.class))));
 
         register(new ActionFactory<>("particle", (data, location) -> {
             location.checkFinite();
@@ -76,42 +86,42 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
             Object particleData = null;
             if (particle.getDataType() != Void.class) {
                 if (particle.getDataType() == BlockData.class) {
-                    particleData = data.get("material", Material.class).createBlockData();
+                    Material material = data.getUnsafe("material");
+                    if (material == null) return;
+                    particleData = material.createBlockData(); // TODO Create block data beforehand
                 }
-            } else {
-                particleData = data.getDouble("speed");
-            }
+            } else particleData = data.getDouble("speed");
             final Vector vector = data.get("vector", Vector.class);
             world.spawnParticle(particle, location.add(data.get("offset", Vector.class)), data.getInt("amount"), vector.getX(), vector.getY(), vector.getZ(), particleData);
         }, new ReadableOptions()
                 .add("particle", Readable.enumeration(Particle.class))
-                .add("material", Readable.enumeration(Material.class))
+                .add("material", Readable.enumeration(Material.class), null)
                 .add("amount", Readable.number(), 1)
                 .add("speed", Readable.number(), 1d)
                 .add(List.of("offset", "vector"), VECTOR, new Vector(0, 0, 0))
         ));
 
-        register(new ActionFactory<>("summon_mob", (data, location) -> {
+        register(new ActionFactory<>("summon", (data, location) -> {
             location.checkFinite();
             final World world = location.getWorld();
             if (world == null) return;
             EntityType entityType = data.getUnsafe("entity_type");
             final Entity spawnedEntity = world.spawnEntity(location, entityType);
-            final Consumer<Entity> mobAction = data.getUnsafe("entity_action", null);
+            final Consumer<Entity> mobAction = data.getUnsafe("action", null);
             if (mobAction != null) mobAction.accept(spawnedEntity);
         }, new ReadableOptions()
                 .add("entity_type", Readable.enumeration(EntityType.class))
-                .add("entity_action", ENTITY_ACTION, null)
+                .add("action", ENTITY_ACTION, null)
         ));
 
-        register(new ActionFactory<>("strike_lightning", (data, location) -> {
+        register(new ActionFactory<>("lightning", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
-            if (data.getBoolean("effect_only"))
-                world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
-            else world.spigot().strikeLightning(location, data.getBoolean("silent"));
+            if (data.getBoolean("damage"))
+                world.spigot().strikeLightning(location, data.getBoolean("silent"));
+            else world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
         }, new ReadableOptions()
-                .add("effect_only", Readable.bool(), false)
+                .add("damage", Readable.bool(), true)
                 .add("silent", Readable.bool(), false)
         ));
     }
