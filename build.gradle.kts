@@ -19,7 +19,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
 
-    compileOnly("io.github.thegatesdev:maple:3.0.0")
+    api("io.github.thegatesdev:maple:3.0.0")
     compileOnly("io.github.thegatesdev:eventador:2.0.0")
     compileOnly("io.github.thegatesdev:threshold:0.2")
 }
@@ -42,6 +42,13 @@ tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
+    }
+
+    shadowJar {
+        minimize()
+        dependencies {
+            include(dependency("com.github.thegatesdev:maple"))
+        }
     }
 
     register<Copy>("pluginJar") {
