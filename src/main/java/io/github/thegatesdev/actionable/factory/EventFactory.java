@@ -4,11 +4,12 @@ import io.github.thegatesdev.eventador.core.EventType;
 import io.github.thegatesdev.eventador.listener.stat.EventTypeHolder;
 import io.github.thegatesdev.eventador.listener.stat.StaticListener;
 import io.github.thegatesdev.maple.data.DataMap;
-import io.github.thegatesdev.mapletree.data.DataTypeHolder;
-import io.github.thegatesdev.mapletree.data.Factory;
-import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.data.ReadableOptionsHolder;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.maple.data.DataValue;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
+import io.github.thegatesdev.maple.read.struct.ReadableOptionsHolder;
+import io.github.thegatesdev.maple.registry.struct.Factory;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nonnull;
@@ -55,17 +56,17 @@ public class EventFactory<E extends Event> implements Identifiable, Factory<Even
     }
 
 
-    public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, Predicate<E> eventPredicate, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD) {
+    public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, Predicate<E> eventPredicate, DataTypeHolder<DataValue<Predicate<D>>> cD, DataTypeHolder<DataValue<Consumer<D>>> aD) {
         if (!performerNames.add(name))
             throw new IllegalArgumentException("Performer by the name of %s already exists for event %s".formatted(name, eventType.name()));
         final PerformerFactory<D> factory = new PerformerFactory<>(name, dataGetter, eventPredicate);
-        readableOptions.add(factory.conditionKey, cD, null);
-        readableOptions.add(factory.actionKey, aD, null);
+        readableOptions.addOptional(factory.conditionKey, cD);
+        readableOptions.addOptional(factory.actionKey, aD);
         performerFactories.add(factory);
         return this;
     }
 
-    public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, DataTypeHolder<Predicate<D>> cD, DataTypeHolder<Consumer<D>> aD) {
+    public <D> EventFactory<E> addPerformer(String name, Function<E, D> dataGetter, DataTypeHolder<DataValue<Predicate<D>>> cD, DataTypeHolder<DataValue<Consumer<D>>> aD) {
         return addPerformer(name, dataGetter, null, cD.dataType(), aD.dataType());
     }
 

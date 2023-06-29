@@ -5,8 +5,9 @@ import io.github.thegatesdev.eventador.core.EventType;
 import io.github.thegatesdev.eventador.core.EventTypes;
 import io.github.thegatesdev.maple.data.DataElement;
 import io.github.thegatesdev.maple.data.DataMap;
+import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.exception.ElementException;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
+import io.github.thegatesdev.maple.registry.FactoryRegistry;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nullable;
@@ -81,12 +82,12 @@ public class EventFactories extends FactoryRegistry<EventFactory<?>.ReadPerforme
     }
 
     @Override
-    public EventFactory<?>.ReadPerformers read(DataElement element) {
+    public DataValue<EventFactory<?>.ReadPerformers> read(DataElement element) {
         var map = element.requireOf(DataMap.class);
         String type = map.getString("type");
         var factory = get(type);
         if (factory == null)
             throw new ElementException(map, "Specified event %s does not exist".formatted(type));
-        return factory.build(map);
+        return DataValue.of(factory.build(map));
     }
 }

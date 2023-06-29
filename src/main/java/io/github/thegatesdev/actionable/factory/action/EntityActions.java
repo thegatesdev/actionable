@@ -4,10 +4,8 @@ import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.RaycastType;
 import io.github.thegatesdev.actionable.util.twin.MutableTwin;
 import io.github.thegatesdev.actionable.util.twin.Twin;
-import io.github.thegatesdev.maple.data.DataPrimitive;
-import io.github.thegatesdev.mapletree.data.Readable;
-import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
 import io.github.thegatesdev.threshold.Threshold;
 import net.kyori.adventure.text.Component;
 import org.bukkit.FluidCollisionMode;
@@ -22,12 +20,16 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Actionable.*;
 import static io.github.thegatesdev.actionable.Factories.*;
+import static io.github.thegatesdev.maple.read.Readable.*;
 
 public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>, ActionFactory<Entity>> {
     public EntityActions(String id) {
@@ -37,7 +39,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.multipleFactory(ENTITY_ACTION));
+        register(ActionFactory.moreFactory(ENTITY_ACTION));
         register(ActionFactory.ifElseFactory(ENTITY_CONDITION, ENTITY_ACTION));
         register(ActionFactory.loopFactory(ENTITY_ACTION));
         register(ActionFactory.loopWhileFactory(ENTITY_ACTION, ENTITY_CONDITION));
@@ -50,7 +52,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
         }, new ReadableOptions()
                 .add("offset", VECTOR, new Vector(0, 0, 0))
                 .add("action", ENTITY_LOCATION_ACTION)
-                .add("relative", Readable.bool(), false)
+                .add("relative", bool(), false)
         ));
 
         register(new ActionFactory<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()
@@ -64,7 +66,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
         register(new ActionFactory<>("run_command", (data, entity) -> {
             if (entity instanceof Player player) player.performCommand(data.getString("command"));
         }, new ReadableOptions()
-                .add("command", Readable.string())
+                .add("command", string())
         ));
 
         register(new ActionFactory<>("swing_hand", (data, entity) -> {
@@ -74,7 +76,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 else if (slot == EquipmentSlot.OFF_HAND) livingEntity.swingOffHand();
             }
         }, new ReadableOptions()
-                .add("hand", Readable.enumeration(EquipmentSlot.class))
+                .add("hand", enumeration(EquipmentSlot.class))
         ));
 
         register(new ActionFactory<>("drop_slot", (data, entity) -> {
@@ -88,8 +90,8 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 if (droppedItemAction != null) droppedItemAction.accept(Twin.of(entity, item));
             }
         }, new ReadableOptions()
-                .add("slot", Readable.integer())
-                .add("drop_action", ENTITY_ENTITY_ACTION, null)
+                .add("slot", integer())
+                .addOptional("drop_action", ENTITY_ENTITY_ACTION)
         ));
 
         register(new ActionFactory<>("velocity", (data, entity) -> {
@@ -99,8 +101,8 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             else entity.setVelocity(entity.getVelocity().add(dir));
         }, new ReadableOptions()
                 .add("direction", VECTOR)
-                .add("set", Readable.bool(), true)
-                .add("relative", Readable.bool(), false)
+                .add("set", bool(), true)
+                .add("relative", bool(), false)
         ));
 
         register(new ActionFactory<>("run_in_area", (data, entity) -> {
@@ -124,16 +126,16 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             }
         }, new ReadableOptions()
                 .add("range", VECTOR, new Vector(10, 10, 10))
-                .add("include_self", Readable.bool(), false)
-                .add("max_entities", Readable.integer(), 10)
-                .add("condition", ENTITY_ENTITY_CONDITION, null)
+                .add("include_self", bool(), false)
+                .add("max_entities", integer(), 10)
+                .addOptional("condition", ENTITY_ENTITY_CONDITION)
                 .add("action", ENTITY_ENTITY_ACTION)
-                .after("_pred", data -> {
+                .after(data -> { // Generate predicate with all conditions
                     Predicate<Twin<Entity, Entity>> out = twin -> twin.actor().isValid() && twin.target().isValid();
                     if (!data.getBoolean("include_self")) out = out.and(twin -> !twin.areEqual());
                     final Predicate<Twin<Entity, Entity>> entityCondition = data.getUnsafe("condition", null);
                     if (entityCondition != null) out = out.and(entityCondition);
-                    return new DataPrimitive(out);
+                    data.set("_pred", out);
                 })
         ));
 
@@ -143,15 +145,15 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             else entity.teleport(where.toLocation(entity.getWorld()));
         }, new ReadableOptions()
                 .add("where", VECTOR)
-                .add("relative", Readable.bool(), false)
+                .add("relative", bool(), false)
         ));
 
         register(new ActionFactory<>("set_fire", (data, entity) -> {
             final int fireTicks = data.getInt("ticks");
             if (data.getBoolean("force") || entity.getFireTicks() < fireTicks) entity.setFireTicks(fireTicks);
         }, new ReadableOptions()
-                .add("ticks", Readable.integer(), 1000)
-                .add("force", Readable.bool(), false)
+                .add("ticks", integer(), 1000)
+                .add("force", bool(), false)
         ));
 
         register(new ActionFactory<>("raycast", (data, entity) -> {
@@ -210,21 +212,23 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                     rayAction.accept(twin.setTarget(l.set(position.getX(), position.getY(), position.getZ())));
             }
         }, new ReadableOptions()
-                .add(Readable.number(), Map.of("max_distance", 100, "step_distance", 1, "ray_size", 1))
-                .add("offset", VECTOR, null)
-                .add("ray_action", ENTITY_LOCATION_ACTION, null)
-                .add("hit_action", ENTITY_LOCATION_ACTION, null)
-                .add("relative_hit_action", ENTITY_LOCATION_ACTION, null)
-                .add("hit_entity_action", ENTITY_ENTITY_ACTION, null)
-                .add("hit_entity_condition", ENTITY_ENTITY_CONDITION, null)
-                .add("cast_type", Readable.enumeration(RaycastType.class), RaycastType.BOTH)
+                .add("max_distance", number(), 100)
+                .add("step_distance", number(), 1)
+                .add("ray_size", number(), 1)
+                .addOptional("offset", VECTOR)
+                .addOptional("ray_action", ENTITY_LOCATION_ACTION)
+                .addOptional("hit_action", ENTITY_LOCATION_ACTION)
+                .addOptional("relative_hit_action", ENTITY_LOCATION_ACTION)
+                .addOptional("hit_entity_action", ENTITY_ENTITY_ACTION)
+                .addOptional("hit_entity_condition", ENTITY_ENTITY_CONDITION)
+                .add("cast_type", enumeration(RaycastType.class), RaycastType.BOTH)
         ));
 
         register(new ActionFactory<>("damage", (data, entity) -> {
             if (entity instanceof LivingEntity livingEntity)
                 livingEntity.damage(data.getDouble("amount"), entity.getUniqueId() == livingEntity.getUniqueId() ? null : entity);
         }, new ReadableOptions()
-                .add("amount", Readable.number(), 1)
+                .add("amount", number(), 1)
         ));
 
         register(new ActionFactory<>("effect", (data, entity) -> {
@@ -237,9 +241,12 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             }
         }, new ReadableOptions()
                 .add("effect", EFFECT_TYPE)
-                .add("remove", Readable.bool(), false)
-                .add(Readable.integer(), Map.of("duration", 20, "amplifier", 0))
-                .add(Readable.bool(), Map.of("remove", false, "is_ambient", false, "show_particles", true, "show_icon", true))
+                .add("remove", bool(), false)
+                .add("duration", integer(), 20)
+                .add("amplifier", integer(), 0)
+                .add("is_ambient", bool(), false)
+                .add("show_particles", bool(), true)
+                .add("show_icon", bool(), true)
         ));
 
         register(new ActionFactory<>("dismount", (data, entity) -> {
@@ -249,7 +256,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 var action = data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action", null);
                 if (action != null) action.accept(Twin.of(entity, vehicle));
             }
-        }, new ReadableOptions().add("action", ENTITY_ENTITY_ACTION, null)));
+        }, new ReadableOptions().addOptional("action", ENTITY_ENTITY_ACTION)));
 
         register(new ActionFactory<>("run_on_vehicle", (data, entity) -> {
             final Entity vehicle = entity.getVehicle();

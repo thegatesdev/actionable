@@ -2,14 +2,14 @@ package io.github.thegatesdev.actionable.factory;
 
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.maple.data.DataMap;
-import io.github.thegatesdev.mapletree.data.DataTypeHolder;
-import io.github.thegatesdev.mapletree.data.Factory;
-import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.data.ReadableOptionsHolder;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.maple.data.DataValue;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
+import io.github.thegatesdev.maple.read.struct.ReadableOptionsHolder;
+import io.github.thegatesdev.maple.registry.struct.Factory;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -28,48 +28,52 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
         this(id, predicate, new ReadableOptions());
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> flippedFactory(DataTypeHolder<? extends Predicate<Twin<T, A>>> dataType) {
+    public static <A, T> ConditionFactory<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Predicate<Twin<T, A>>>> dataType) {
         return new ConditionFactory<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new ReadableOptions().add("condition", dataType));
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> splitAndFactory(DataTypeHolder<? extends Predicate<A>> actorCondition, DataTypeHolder<? extends Predicate<T>> targetCondition) {
-        return new ConditionFactory<>("split_and", (data, twin) -> {
-            final Predicate<A> aC = data.getUnsafe("actor_condition", null);
-            final Predicate<T> tC = data.getUnsafe("target_condition", null);
-            return (aC == null || aC.test(twin.actor())) && (tC == null || tC.test(twin.target()));
+    public static <A, T> ConditionFactory<Twin<A, T>> splitAndFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
+        return new ConditionFactory<>("split_all", (data, twin) -> {
+            Predicate<A> actorC = data.getUnsafe("actor_condition", null);
+            if (actorC != null && !actorC.test(twin.actor())) return false;
+            Predicate<T> targetC = data.getUnsafe("target_condition", null);
+            return targetC != null && targetC.test(twin.target());
         }, new ReadableOptions()
-                .add("actor_condition", actorCondition, null)
-                .add("target_condition", targetCondition, null)
+                .addOptional("actor_condition", actorCondition)
+                .addOptional("target_condition", targetCondition)
         );
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> splitOrFactory(DataTypeHolder<? extends Predicate<A>> actorCondition, DataTypeHolder<? extends Predicate<T>> targetCondition) {
-        return new ConditionFactory<>("split_or", (data, twin) -> {
-            final Predicate<A> aC = data.getUnsafe("actor_condition", null);
-            final Predicate<T> tC = data.getUnsafe("target_condition", null);
-            return (aC == null || aC.test(twin.actor())) || (tC == null || tC.test(twin.target()));
+    public static <A, T> ConditionFactory<Twin<A, T>> splitOrFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
+        return new ConditionFactory<>("split_any", (data, twin) -> {
+            Predicate<A> actorC = data.getUnsafe("actor_condition", null);
+            if (actorC != null && actorC.test(twin.actor())) return true;
+            Predicate<T> targetC = data.getUnsafe("target_condition", null);
+            return targetC != null && targetC.test(twin.target());
         }, new ReadableOptions()
-                .add("actor_condition", actorCondition, null)
-                .add("target_condition", targetCondition, null)
+                .addOptional("actor_condition", actorCondition)
+                .addOptional("target_condition", targetCondition)
         );
     }
 
-    public static <T> ConditionFactory<T> andFactory(DataTypeHolder<? extends Predicate<T>> dataType) {
-        return new ConditionFactory<>("and", (data, t) -> {
-            final var conditions = data.<List<Predicate<T>>>getUnsafe("conditions");
-            for (int i = 0, unsafeSize = conditions.size(); i < unsafeSize; i++)
-                if (!conditions.get(i).test(t)) return false;
+    public static <T> ConditionFactory<T> andFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
+        return new ConditionFactory<>("all_true", (data, t) -> {
+            var list = data.getList("conditions");
+            for (int i = 0; i < list.size(); i++) {
+                if (!list.<Predicate<T>>getUnsafe(i).test(t)) return false;
+            }
             return true;
-        }, new ReadableOptions().add("conditions", dataType.list()));
+        }, new ReadableOptions().add("conditions", dataType.dataType().list()));
     }
 
-    public static <T> ConditionFactory<T> orFactory(DataTypeHolder<? extends Predicate<T>> dataType) {
-        return new ConditionFactory<>("or", (data, t) -> {
-            final var conditions = data.<List<Predicate<T>>>getUnsafe("conditions");
-            for (int i = 0, conditionsSize = conditions.size(); i < conditionsSize; i++)
-                if (conditions.get(i).test(t)) return true;
+    public static <T> ConditionFactory<T> orFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
+        return new ConditionFactory<>("any_true", (data, t) -> {
+            var list = data.getList("conditions");
+            for (int i = 0; i < list.size(); i++) {
+                if (list.<Predicate<T>>getUnsafe(i).test(t)) return true;
+            }
             return false;
-        }, new ReadableOptions().add("conditions", dataType.list()));
+        }, new ReadableOptions().add("conditions", dataType.dataType().list()));
     }
 
     @Override

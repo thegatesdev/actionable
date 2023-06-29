@@ -1,16 +1,16 @@
 package io.github.thegatesdev.actionable.factory.condition;
 
 import io.github.thegatesdev.actionable.factory.ConditionFactory;
-import io.github.thegatesdev.mapletree.data.Readable;
-import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
-import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Factories.ENTITY_CONDITION;
+import static io.github.thegatesdev.maple.read.Readable.enumeration;
 
 public final class EntityConditions extends StaticFactoryRegistry<Predicate<Entity>, ConditionFactory<Entity>> {
     public EntityConditions(String id) {
@@ -23,8 +23,8 @@ public final class EntityConditions extends StaticFactoryRegistry<Predicate<Enti
         register(ConditionFactory.orFactory(ENTITY_CONDITION));
         register(ConditionFactory.andFactory(ENTITY_CONDITION));
 
-        register(new ConditionFactory<>("is_of", (data, entity) -> entity.getType() == data.get("entity_type", EntityType.class),
-                new ReadableOptions().add("entity_type", Readable.enumeration(EntityType.class))
+        register(new ConditionFactory<>("is_of", (data, entity) -> entity.getType() == data.getObject("entity_type", EntityType.class),
+                new ReadableOptions().add("entity_type", enumeration(EntityType.class))
         ));
 
         register(new ConditionFactory<>("sneaking", (data, entity) -> entity.isSneaking()));

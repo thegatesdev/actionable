@@ -2,8 +2,8 @@ package io.github.thegatesdev.actionable.factory.condition;
 
 import io.github.thegatesdev.actionable.factory.ConditionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
-import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 

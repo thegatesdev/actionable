@@ -1,10 +1,9 @@
 package io.github.thegatesdev.actionable.factory.action;
 
 import io.github.thegatesdev.actionable.factory.ActionFactory;
-import io.github.thegatesdev.mapletree.data.Readable;
-import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
-import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -18,6 +17,7 @@ import java.util.function.Predicate;
 import static io.github.thegatesdev.actionable.Actionable.COLORED_STRING;
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
 import static io.github.thegatesdev.actionable.Factories.*;
+import static io.github.thegatesdev.maple.read.Readable.bool;
 
 public final class WorldActions extends StaticFactoryRegistry<Consumer<World>, ActionFactory<World>> {
     public WorldActions(String id) {
@@ -27,7 +27,7 @@ public final class WorldActions extends StaticFactoryRegistry<Consumer<World>, A
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.multipleFactory(WORLD_ACTION));
+        register(ActionFactory.moreFactory(WORLD_ACTION));
         register(ActionFactory.ifElseFactory(WORLD_CONDITION, WORLD_ACTION));
         register(ActionFactory.loopFactory(WORLD_ACTION));
         register(ActionFactory.loopWhileFactory(WORLD_ACTION, WORLD_CONDITION));
@@ -46,7 +46,7 @@ public final class WorldActions extends StaticFactoryRegistry<Consumer<World>, A
                 }
         }, new ReadableOptions()
                 .add("action", ENTITY_ACTION)
-                .add("condition", ENTITY_CONDITION, null)
+                .addOptional("condition", ENTITY_CONDITION)
         ));
         register(new ActionFactory<>("each_entity", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -61,8 +61,8 @@ public final class WorldActions extends StaticFactoryRegistry<Consumer<World>, A
                 }
         }, new ReadableOptions()
                 .add("action", ENTITY_ACTION)
-                .add("condition", ENTITY_CONDITION, null)
-                .add("living", Readable.bool(), false)
+                .addOptional("condition", ENTITY_CONDITION)
+                .add("living", bool(), false)
         ));
 
         register(new ActionFactory<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()

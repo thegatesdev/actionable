@@ -2,10 +2,9 @@ package io.github.thegatesdev.actionable.factory.action;
 
 import io.github.thegatesdev.actionable.factory.ActionFactory;
 import io.github.thegatesdev.actionable.util.twin.Twin;
-import io.github.thegatesdev.mapletree.data.Readable;
-import io.github.thegatesdev.mapletree.data.ReadableOptions;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
-import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -14,6 +13,8 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 import static io.github.thegatesdev.actionable.Factories.*;
+import static io.github.thegatesdev.maple.read.Readable.bool;
+import static io.github.thegatesdev.maple.read.Readable.number;
 
 public final class EntityEntityActions extends StaticFactoryRegistry<Consumer<Twin<Entity, Entity>>, ActionFactory<Twin<Entity, Entity>>> {
     public EntityEntityActions(String id) {
@@ -23,7 +24,7 @@ public final class EntityEntityActions extends StaticFactoryRegistry<Consumer<Tw
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.multipleFactory(ENTITY_ENTITY_ACTION));
+        register(ActionFactory.moreFactory(ENTITY_ENTITY_ACTION));
         register(ActionFactory.ifElseFactory(ENTITY_ENTITY_CONDITION, ENTITY_ENTITY_ACTION));
         register(ActionFactory.flippedFactory(ENTITY_ENTITY_ACTION));
         register(ActionFactory.splitFactory(ENTITY_ACTION, ENTITY_ACTION));
@@ -41,9 +42,9 @@ public final class EntityEntityActions extends StaticFactoryRegistry<Consumer<Tw
             if (data.getBoolean("set")) launched.setVelocity(direction);
             else launched.setVelocity(launched.getVelocity().add(direction));
         }, new ReadableOptions()
-                .add("amount", Readable.number(), 1)
-                .add("up", Readable.number(), 0)
-                .add("set", Readable.bool(), false)
+                .add("amount", number(), 1)
+                .add("up", number(), 0)
+                .add("set", bool(), false)
         ));
 
         register(new ActionFactory<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", ENTITY_LOCATION_ACTION)));
@@ -55,7 +56,7 @@ public final class EntityEntityActions extends StaticFactoryRegistry<Consumer<Tw
         register(new ActionFactory<>("damage_target", (data, twin) -> {
             if (twin.target() instanceof LivingEntity livingTarget)
                 livingTarget.damage(data.getDouble("amount"), twin.actor());
-        }, new ReadableOptions().add("amount", Readable.number())));
+        }, new ReadableOptions().add("amount", number())));
 
         register(new ActionFactory<>("mount_target", (data, twin) -> twin.target().addPassenger(twin.actor())));
     }

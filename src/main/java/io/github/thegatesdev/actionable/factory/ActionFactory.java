@@ -2,15 +2,19 @@ package io.github.thegatesdev.actionable.factory;
 
 import io.github.thegatesdev.actionable.util.twin.Twin;
 import io.github.thegatesdev.maple.data.DataMap;
-import io.github.thegatesdev.mapletree.data.Readable;
-import io.github.thegatesdev.mapletree.data.*;
-import io.github.thegatesdev.mapletree.registry.Identifiable;
+import io.github.thegatesdev.maple.data.DataValue;
+import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
+import io.github.thegatesdev.maple.read.struct.ReadableOptionsHolder;
+import io.github.thegatesdev.maple.registry.struct.Factory;
+import io.github.thegatesdev.maple.registry.struct.Identifiable;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import static io.github.thegatesdev.maple.read.Readable.integer;
 
 public class ActionFactory<T> implements Identifiable, Factory<Consumer<T>>, ReadableOptionsHolder {
     private final String id;
@@ -27,55 +31,58 @@ public class ActionFactory<T> implements Identifiable, Factory<Consumer<T>>, Rea
         this(id, effect, new ReadableOptions());
     }
 
-    public static <T> ActionFactory<T> multipleFactory(DataTypeHolder<? extends Consumer<T>> dataType) {
-        return new ActionFactory<>("multiple", (data, t) -> data.<Collection<Consumer<T>>>getUnsafe("actions").forEach(action -> action.accept(t)), new ReadableOptions().add("actions", dataType.list()));
+    public static <T> ActionFactory<T> moreFactory(DataTypeHolder<DataValue<Consumer<T>>> dataType) {
+        return new ActionFactory<>("more", (data, t) ->
+                data.getList("actions").each(element -> element.asValue().<Consumer<T>>valueUnsafe().accept(t)),
+                new ReadableOptions().add("actions", dataType.dataType().list()));
     }
 
-    public static <T> ActionFactory<T> loopFactory(DataTypeHolder<? extends Consumer<T>> loopedActionType) {
+    public static <T> ActionFactory<T> loopFactory(DataTypeHolder<DataValue<Consumer<T>>> loopedActionType) {
         return new ActionFactory<>("repeat", (data, t) -> {
-            final int times = data.getInt("times");
-            final Consumer<T> action = data.getUnsafe("action");
+            int times = data.getInt("times");
+            Consumer<T> action = data.getUnsafe("action");
             for (int i = 0; i < times; i++) action.accept(t);
-        }, new ReadableOptions().add("times", Readable.number()).add("action", loopedActionType));
+        }, new ReadableOptions().add("times", integer()).add("action", loopedActionType));
     }
 
-    public static <T> ActionFactory<T> loopWhileFactory(DataTypeHolder<? extends Consumer<T>> loopedActionType, DataTypeHolder<? extends Predicate<T>> loopConditionType) {
+    public static <T> ActionFactory<T> loopWhileFactory(DataTypeHolder<DataValue<Consumer<T>>> loopedActionType, DataTypeHolder<DataValue<Predicate<T>>> loopConditionType) {
         return new ActionFactory<>("repeat_while", (data, t) -> {
-            final Consumer<T> action = data.getUnsafe("action");
-            final Predicate<T> condition = data.getUnsafe("condition");
-            while (condition.test(t)) action.accept(t);
+            Consumer<T> action = data.getUnsafe("action");
+            Predicate<T> condition = data.getUnsafe("condition");
+            for (int i = 0; i < 1000; i++) { // 1000 arbitrary limit on iteration count for now
+                if (!condition.test(t)) break;
+                action.accept(t);
+            }
         }, new ReadableOptions().add("action", loopedActionType).add("condition", loopConditionType));
     }
 
-    public static <A, T> ActionFactory<Twin<A, T>> flippedFactory(DataTypeHolder<? extends Consumer<Twin<T, A>>> dataType) {
+    public static <A, T> ActionFactory<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Consumer<Twin<T, A>>>> dataType) {
         return new ActionFactory<>("flip_actor", (data, o) -> data.<Consumer<Twin<T, A>>>getUnsafe("action").accept(o.flipped()), new ReadableOptions().add("action", dataType));
     }
 
-    public static <A, T> ActionFactory<Twin<A, T>> splitFactory(DataTypeHolder<? extends Consumer<A>> actorAction, DataTypeHolder<? extends Consumer<T>> targetAction) {
+    public static <A, T> ActionFactory<Twin<A, T>> splitFactory(DataTypeHolder<DataValue<Consumer<A>>> actorAction, DataTypeHolder<DataValue<Consumer<T>>> targetAction) {
         return new ActionFactory<>("split", (data, twin) -> {
-            final Consumer<A> aA = data.getUnsafe("actor_action", null);
-            if (aA != null) aA.accept(twin.actor());
-            final Consumer<T> tA = data.getUnsafe("target_action", null);
-            if (tA != null) tA.accept(twin.target());
+            Consumer<A> actorA = data.getUnsafe("actor_action", null);
+            Consumer<T> targetA = data.getUnsafe("target_action", null);
+            if (actorA != null) actorA.accept(twin.actor());
+            if (targetA != null) targetA.accept(twin.target());
         }, new ReadableOptions()
-                .add("actor_action", actorAction, null)
-                .add("target_action", targetAction, null)
+                .addOptional("actor_action", actorAction)
+                .addOptional("target_action", targetAction)
         );
     }
 
 
-    public static <T> ActionFactory<T> ifElseFactory(DataTypeHolder<? extends Predicate<T>> conditionDataType, DataTypeHolder<? extends Consumer<T>> actionDataType) {
+    public static <T> ActionFactory<T> ifElseFactory(DataTypeHolder<DataValue<Predicate<T>>> conditionDataType, DataTypeHolder<DataValue<Consumer<T>>> actionDataType) {
         return new ActionFactory<>("if_else", (data, t) -> {
-            if (data.<Predicate<T>>getUnsafe("condition").test(t))
-                data.<Consumer<T>>getUnsafe("if_action").accept(t);
-            else {
-                final Consumer<T> elseAction = data.getUnsafe("else_action", null);
-                if (elseAction != null) elseAction.accept(t);
-            }
+            Predicate<T> condition = data.getUnsafe("condition");
+            Consumer<T> ifAction = data.getUnsafe("if_action");
+            if (condition.test(t)) ifAction.accept(t);
+            else data.ifValue("else_action", value -> value.<Consumer<T>>valueUnsafe().accept(t));
         }, new ReadableOptions()
                 .add("condition", conditionDataType)
                 .add("if_action", actionDataType)
-                .add("else_action", actionDataType, null)
+                .addOptional("else_action", actionDataType)
         );
     }
 

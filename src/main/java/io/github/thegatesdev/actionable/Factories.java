@@ -2,8 +2,8 @@ package io.github.thegatesdev.actionable;
 
 import io.github.thegatesdev.actionable.factory.action.*;
 import io.github.thegatesdev.actionable.factory.condition.*;
-import io.github.thegatesdev.mapletree.registry.FactoryRegistry;
-import io.github.thegatesdev.mapletree.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.maple.registry.FactoryRegistry;
+import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
 
 import java.util.*;
 
