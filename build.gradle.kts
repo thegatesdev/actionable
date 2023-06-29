@@ -4,8 +4,8 @@ plugins {
 }
 
 group = "io.github.thegatesdev"
-version = "1.2"
-description = "Actions and conditions with YAML"
+version = "2.0"
+description = "Data driven actions, conditions and event listening."
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 java {
@@ -14,14 +14,13 @@ java {
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://jitpack.io")
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
 
-    api("io.github.thegatesdev:mapletree:1.1")
-    compileOnly("io.github.thegatesdev:eventador:1.4.2")
+    compileOnly("io.github.thegatesdev:maple:3.0.0")
+    compileOnly("io.github.thegatesdev:eventador:2.0.0")
     compileOnly("io.github.thegatesdev:threshold:0.2")
 }
 
@@ -32,7 +31,7 @@ tasks {
             "name" to project.name,
             "version" to project.version,
             "description" to project.description,
-            "apiVersion" to "1.19"
+            "apiVersion" to "1.20"
         )
         inputs.properties(props)
         filesMatching("plugin.yml") {
@@ -43,14 +42,6 @@ tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
-    }
-
-    shadowJar {
-        minimize()
-        dependencies {
-            include(dependency("io.github.thegatesdev:mapletree"))
-            include(dependency("com.github.thegatesdev:maple"))
-        }
     }
 
     register<Copy>("pluginJar") {
