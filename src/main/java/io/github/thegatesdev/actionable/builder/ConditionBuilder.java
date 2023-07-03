@@ -1,39 +1,37 @@
-package io.github.thegatesdev.actionable.factory;
+package io.github.thegatesdev.actionable.builder;
 
-import io.github.thegatesdev.actionable.util.twin.Twin;
+import io.github.thegatesdev.actionable.registry.Builder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
-import io.github.thegatesdev.maple.read.struct.ReadableOptionsHolder;
-import io.github.thegatesdev.maple.registry.struct.Factory;
-import io.github.thegatesdev.maple.registry.struct.Identifiable;
+import io.github.thegatesdev.threshold.util.twin.Twin;
 
 import javax.annotation.Nonnull;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>, ReadableOptionsHolder {
-    private final String id;
+public class ConditionBuilder<R> implements Builder<Predicate<R>> {
+    private final String key;
     private final BiPredicate<DataMap, R> predicate;
     private final ReadableOptions readableOptions;
 
-    public ConditionFactory(String id, BiPredicate<DataMap, R> predicate, ReadableOptions readableOptions) {
-        this.id = id;
+    public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate, ReadableOptions readableOptions) {
+        this.key = key;
         this.predicate = predicate;
         this.readableOptions = readableOptions;
     }
 
-    public ConditionFactory(String id, BiPredicate<DataMap, R> predicate) {
-        this(id, predicate, new ReadableOptions());
+    public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate) {
+        this(key, predicate, new ReadableOptions());
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Predicate<Twin<T, A>>>> dataType) {
-        return new ConditionFactory<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new ReadableOptions().add("condition", dataType));
+    public static <A, T> ConditionBuilder<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Predicate<Twin<T, A>>>> dataType) {
+        return new ConditionBuilder<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new ReadableOptions().add("condition", dataType));
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> splitAndFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
-        return new ConditionFactory<>("split_all", (data, twin) -> {
+    public static <A, T> ConditionBuilder<Twin<A, T>> splitAndFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
+        return new ConditionBuilder<>("split_all", (data, twin) -> {
             Predicate<A> actorC = data.getUnsafe("actor_condition", null);
             if (actorC != null && !actorC.test(twin.actor())) return false;
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
@@ -44,8 +42,8 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
         );
     }
 
-    public static <A, T> ConditionFactory<Twin<A, T>> splitOrFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
-        return new ConditionFactory<>("split_any", (data, twin) -> {
+    public static <A, T> ConditionBuilder<Twin<A, T>> splitOrFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
+        return new ConditionBuilder<>("split_any", (data, twin) -> {
             Predicate<A> actorC = data.getUnsafe("actor_condition", null);
             if (actorC != null && actorC.test(twin.actor())) return true;
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
@@ -56,8 +54,8 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
         );
     }
 
-    public static <T> ConditionFactory<T> andFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
-        return new ConditionFactory<>("all_true", (data, t) -> {
+    public static <T> ConditionBuilder<T> andFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
+        return new ConditionBuilder<>("all_true", (data, t) -> {
             var list = data.getList("conditions");
             for (int i = 0; i < list.size(); i++) {
                 if (!list.<Predicate<T>>getUnsafe(i).test(t)) return false;
@@ -66,8 +64,8 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
         }, new ReadableOptions().add("conditions", dataType.dataType().list()));
     }
 
-    public static <T> ConditionFactory<T> orFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
-        return new ConditionFactory<>("any_true", (data, t) -> {
+    public static <T> ConditionBuilder<T> orFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
+        return new ConditionBuilder<>("any_true", (data, t) -> {
             var list = data.getList("conditions");
             for (int i = 0; i < list.size(); i++) {
                 if (list.<Predicate<T>>getUnsafe(i).test(t)) return true;
@@ -88,8 +86,8 @@ public class ConditionFactory<R> implements Identifiable, Factory<Predicate<R>>,
     }
 
     @Override
-    public String id() {
-        return id;
+    public String key() {
+        return key;
     }
 
     private record Condition<R>(BiPredicate<DataMap, R> condition, DataMap data,

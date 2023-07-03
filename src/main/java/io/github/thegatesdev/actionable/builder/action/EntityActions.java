@@ -1,12 +1,11 @@
-package io.github.thegatesdev.actionable.factory.action;
+package io.github.thegatesdev.actionable.builder.action;
 
-import io.github.thegatesdev.actionable.factory.ActionFactory;
-import io.github.thegatesdev.actionable.util.RaycastType;
-import io.github.thegatesdev.actionable.util.twin.MutableTwin;
-import io.github.thegatesdev.actionable.util.twin.Twin;
+import io.github.thegatesdev.actionable.builder.ActionBuilder;
+import io.github.thegatesdev.actionable.registry.BuilderRegistry;
 import io.github.thegatesdev.maple.read.ReadableOptions;
-import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
 import io.github.thegatesdev.threshold.Threshold;
+import io.github.thegatesdev.threshold.util.twin.MutableTwin;
+import io.github.thegatesdev.threshold.util.twin.Twin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -28,23 +27,23 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Actionable.*;
-import static io.github.thegatesdev.actionable.Factories.*;
+import static io.github.thegatesdev.actionable.registry.Registries.*;
 import static io.github.thegatesdev.maple.read.Readable.*;
 
-public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>, ActionFactory<Entity>> {
+public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>, ActionBuilder<Entity>> {
     public EntityActions(String id) {
-        super(id, ActionFactory::id);
+        super(id);
         info().description("An action executed on a single entity.");
     }
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.moreFactory(ENTITY_ACTION));
-        register(ActionFactory.ifElseFactory(ENTITY_CONDITION, ENTITY_ACTION));
-        register(ActionFactory.loopFactory(ENTITY_ACTION));
-        register(ActionFactory.loopWhileFactory(ENTITY_ACTION, ENTITY_CONDITION));
+        register(ActionBuilder.moreFactory(ENTITY_ACTION));
+        register(ActionBuilder.ifElseFactory(ENTITY_CONDITION, ENTITY_ACTION));
+        register(ActionBuilder.loopFactory(ENTITY_ACTION));
+        register(ActionBuilder.loopWhileFactory(ENTITY_ACTION, ENTITY_CONDITION));
 
-        register(new ActionFactory<>("run_here", (data, entity) -> {
+        register(new ActionBuilder<>("run_here", (data, entity) -> {
             Vector offset = data.getUnsafe("offset");
             var loc = entity.getLocation();
             if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
@@ -55,21 +54,21 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("relative", bool(), false)
         ));
 
-        register(new ActionFactory<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()
+        register(new ActionBuilder<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()
                 .add("action", WORLD_ACTION)
         ));
 
-        register(new ActionFactory<>("send_message", (data, entity) -> entity.sendMessage(data.<Component>getUnsafe("message")), new ReadableOptions()
+        register(new ActionBuilder<>("send_message", (data, entity) -> entity.sendMessage(data.<Component>getUnsafe("message")), new ReadableOptions()
                 .add("message", COLORED_STRING)
         ));
 
-        register(new ActionFactory<>("run_command", (data, entity) -> {
+        register(new ActionBuilder<>("run_command", (data, entity) -> {
             if (entity instanceof Player player) player.performCommand(data.getString("command"));
         }, new ReadableOptions()
                 .add("command", string())
         ));
 
-        register(new ActionFactory<>("swing_hand", (data, entity) -> {
+        register(new ActionBuilder<>("swing_hand", (data, entity) -> {
             if (entity instanceof LivingEntity livingEntity) {
                 EquipmentSlot slot = data.getUnsafe("hand");
                 if (slot == EquipmentSlot.HAND) livingEntity.swingMainHand();
@@ -79,7 +78,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("hand", enumeration(EquipmentSlot.class))
         ));
 
-        register(new ActionFactory<>("drop_slot", (data, entity) -> {
+        register(new ActionBuilder<>("drop_slot", (data, entity) -> {
             if (entity instanceof HumanEntity humanEntity) {
                 final int slot = data.getInt("slot");
                 final ItemStack stack = humanEntity.getInventory().getItem(slot);
@@ -94,7 +93,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .addOptional("drop_action", ENTITY_ENTITY_ACTION)
         ));
 
-        register(new ActionFactory<>("velocity", (data, entity) -> {
+        register(new ActionBuilder<>("velocity", (data, entity) -> {
             Vector dir = data.getUnsafe("direction");
             if (data.getBoolean("relative")) dir = entity.getLocation().getDirection().multiply(dir);
             if (data.getBoolean("set")) entity.setVelocity(dir);
@@ -105,7 +104,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("relative", bool(), false)
         ));
 
-        register(new ActionFactory<>("run_in_area", (data, entity) -> {
+        register(new ActionBuilder<>("run_in_area", (data, entity) -> {
             final Location location = entity.getLocation();
             final MutableTwin<Entity, Entity> twinCache = new MutableTwin<>(entity, null);
             final List<Entity> nearbyEntities;
@@ -139,7 +138,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 })
         ));
 
-        register(new ActionFactory<>("teleport", (data, entity) -> {
+        register(new ActionBuilder<>("teleport", (data, entity) -> {
             final Vector where = data.getUnsafe("where");
             if (data.getBoolean("relative")) entity.teleport(entity.getLocation().add(where));
             else entity.teleport(where.toLocation(entity.getWorld()));
@@ -148,7 +147,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("relative", bool(), false)
         ));
 
-        register(new ActionFactory<>("set_fire", (data, entity) -> {
+        register(new ActionBuilder<>("set_fire", (data, entity) -> {
             final int fireTicks = data.getInt("ticks");
             if (data.getBoolean("force") || entity.getFireTicks() < fireTicks) entity.setFireTicks(fireTicks);
         }, new ReadableOptions()
@@ -156,7 +155,11 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("force", bool(), false)
         ));
 
-        register(new ActionFactory<>("raycast", (data, entity) -> {
+        enum RaycastType {
+            ENTITY, BLOCK, BOTH, COSMETIC
+        }
+
+        register(new ActionBuilder<>("raycast", (data, entity) -> {
             final Consumer<Twin<Entity, Location>> rayAction = data.getUnsafe("ray_action", null);
             final Consumer<Twin<Entity, Location>> hitAction = data.getUnsafe("hit_action", null);
             final Consumer<Twin<Entity, Location>> relativeHitAction = data.getUnsafe("relative_hit_action", null);
@@ -224,14 +227,14 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("cast_type", enumeration(RaycastType.class), RaycastType.BOTH)
         ));
 
-        register(new ActionFactory<>("damage", (data, entity) -> {
+        register(new ActionBuilder<>("damage", (data, entity) -> {
             if (entity instanceof LivingEntity livingEntity)
                 livingEntity.damage(data.getDouble("amount"), entity.getUniqueId() == livingEntity.getUniqueId() ? null : entity);
         }, new ReadableOptions()
                 .add("amount", number(), 1)
         ));
 
-        register(new ActionFactory<>("effect", (data, entity) -> {
+        register(new ActionBuilder<>("effect", (data, entity) -> {
             final PotionEffectType type = data.getUnsafe("effect");
             if (entity instanceof LivingEntity livingEntity) {
                 if (data.getBoolean("remove"))
@@ -249,7 +252,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
                 .add("show_icon", bool(), true)
         ));
 
-        register(new ActionFactory<>("dismount", (data, entity) -> {
+        register(new ActionBuilder<>("dismount", (data, entity) -> {
             final Entity vehicle = entity.getVehicle();
             if (vehicle != null) {
                 vehicle.removePassenger(entity);
@@ -258,7 +261,7 @@ public final class EntityActions extends StaticFactoryRegistry<Consumer<Entity>,
             }
         }, new ReadableOptions().addOptional("action", ENTITY_ENTITY_ACTION)));
 
-        register(new ActionFactory<>("run_on_vehicle", (data, entity) -> {
+        register(new ActionBuilder<>("run_on_vehicle", (data, entity) -> {
             final Entity vehicle = entity.getVehicle();
             if (vehicle != null)
                 data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action").accept(Twin.of(entity, vehicle));

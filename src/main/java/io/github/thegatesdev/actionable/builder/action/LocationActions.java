@@ -1,9 +1,8 @@
-package io.github.thegatesdev.actionable.factory.action;
+package io.github.thegatesdev.actionable.builder.action;
 
-import io.github.thegatesdev.actionable.factory.ActionFactory;
+import io.github.thegatesdev.actionable.builder.ActionBuilder;
+import io.github.thegatesdev.actionable.registry.BuilderRegistry;
 import io.github.thegatesdev.maple.read.ReadableOptions;
-import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
-import io.github.thegatesdev.maple.registry.struct.Identifiable;
 import io.github.thegatesdev.threshold.world.WorldModification;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
@@ -14,23 +13,23 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
-import static io.github.thegatesdev.actionable.Factories.*;
+import static io.github.thegatesdev.actionable.registry.Registries.*;
 import static io.github.thegatesdev.maple.read.Readable.*;
 
-public final class LocationActions extends StaticFactoryRegistry<Consumer<Location>, ActionFactory<Location>> {
+public final class LocationActions extends BuilderRegistry.Static<Consumer<Location>, ActionBuilder<Location>> {
     public LocationActions(String id) {
-        super(id, Identifiable::id);
+        super(id);
         info().description("An action executed at a location in a world.");
     }
 
     @Override
     public void registerStatic() {
-        register(ActionFactory.moreFactory(LOCATION_ACTION));
-        register(ActionFactory.ifElseFactory(LOCATION_CONDITION, LOCATION_ACTION));
-        register(ActionFactory.loopFactory(LOCATION_ACTION));
-        register(ActionFactory.loopWhileFactory(LOCATION_ACTION, LOCATION_CONDITION));
+        register(ActionBuilder.moreFactory(LOCATION_ACTION));
+        register(ActionBuilder.ifElseFactory(LOCATION_CONDITION, LOCATION_ACTION));
+        register(ActionBuilder.loopFactory(LOCATION_ACTION));
+        register(ActionBuilder.loopWhileFactory(LOCATION_ACTION, LOCATION_CONDITION));
 
-        register(new ActionFactory<>("move", (data, location) -> {
+        register(new ActionBuilder<>("move", (data, location) -> {
             Vector dir = data.getUnsafe("direction");
             if (data.getBoolean("relative")) dir = location.getDirection().multiply(dir);
             location.add(dir);
@@ -39,11 +38,11 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
                 .add("relative", bool(), false)
         ));
 
-        register(new ActionFactory<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
+        register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
                 .add("action", WORLD_ACTION)
         ));
 
-        register(new ActionFactory<>("play_sound", (data, location) -> {
+        register(new ActionBuilder<>("play_sound", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
             final Sound sound = data.getUnsafe("sound");
@@ -56,7 +55,7 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
                 .add("volume", number(), 1f)
         ));
 
-        register(new ActionFactory<>("fill", (data, location) -> {
+        register(new ActionBuilder<>("fill", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
             final Material material = data.getUnsafe("block");
@@ -72,13 +71,13 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
                 .add("block", enumeration(Material.class))
         ));
 
-        register(new ActionFactory<>("set_block", (data, location) -> {
+        register(new ActionBuilder<>("set_block", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
             world.getBlockAt(location).setType(data.getUnsafe("block"));
         }, new ReadableOptions().add("block", enumeration(Material.class))));
 
-        register(new ActionFactory<>("particle", (data, location) -> {
+        register(new ActionBuilder<>("particle", (data, location) -> {
             location.checkFinite();
             final World world = location.getWorld();
             if (world == null) return;
@@ -102,7 +101,7 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
                 .add("vector", VECTOR, new Vector())
         ));
 
-        register(new ActionFactory<>("summon", (data, location) -> {
+        register(new ActionBuilder<>("summon", (data, location) -> {
             location.checkFinite();
             final World world = location.getWorld();
             if (world == null) return;
@@ -115,7 +114,7 @@ public final class LocationActions extends StaticFactoryRegistry<Consumer<Locati
                 .addOptional("action", ENTITY_ACTION)
         ));
 
-        register(new ActionFactory<>("lightning", (data, location) -> {
+        register(new ActionBuilder<>("lightning", (data, location) -> {
             final World world = location.getWorld();
             if (world == null) return;
             if (data.getBoolean("damage"))

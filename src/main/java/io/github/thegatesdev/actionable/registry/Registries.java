@@ -1,22 +1,20 @@
-package io.github.thegatesdev.actionable;
+package io.github.thegatesdev.actionable.registry;
 
-import io.github.thegatesdev.actionable.factory.action.*;
-import io.github.thegatesdev.actionable.factory.condition.*;
-import io.github.thegatesdev.maple.registry.FactoryRegistry;
-import io.github.thegatesdev.maple.registry.StaticFactoryRegistry;
+import io.github.thegatesdev.actionable.builder.action.*;
+import io.github.thegatesdev.actionable.builder.condition.*;
 
 import java.util.*;
 
-public class Factories {
+public class Registries {
     private static boolean locked = false;
 
-    private static final Map<String, FactoryRegistry<?, ?>> FACTORY_REGISTRIES = new HashMap<>();
-    private static final Map<String, FactoryRegistry<?, ?>> VIEW = Collections.unmodifiableMap(FACTORY_REGISTRIES);
+    private static final Map<String, BuilderRegistry<?, ?>> FACTORY_REGISTRIES = new HashMap<>();
+    private static final Map<String, BuilderRegistry<?, ?>> VIEW = Collections.unmodifiableMap(FACTORY_REGISTRIES);
 
-    public static <F extends FactoryRegistry<?, ?>> F add(F f) {
-        if (locked) throw new RuntimeException("Factories are locked");
-        if (FACTORY_REGISTRIES.putIfAbsent(f.id(), f) != null)
-            throw new RuntimeException("Duplicate factory entry " + f.id());
+    public static <F extends BuilderRegistry<?, ?>> F add(F f) {
+        if (locked) throw new RuntimeException("Registries are locked");
+        if (FACTORY_REGISTRIES.putIfAbsent(f.key(), f) != null)
+            throw new RuntimeException("Duplicate factory entry " + f.key());
         return f;
     }
 
@@ -24,22 +22,22 @@ public class Factories {
         return VIEW.keySet();
     }
 
-    public static Collection<FactoryRegistry<?, ?>> values() {
+    public static Collection<BuilderRegistry<?, ?>> values() {
         return VIEW.values();
     }
 
-    public static FactoryRegistry<?, ?> get(String key) {
+    public static BuilderRegistry<?, ?> get(String key) {
         return FACTORY_REGISTRIES.get(key);
     }
 
-    static void lock() {
+    public static void lock() {
         locked = true;
     }
 
-    static void registerAll() {
-        if (locked) throw new RuntimeException("Factories are locked");
-        for (final FactoryRegistry<?, ?> factoryRegistry : FACTORY_REGISTRIES.values())
-            if (factoryRegistry instanceof StaticFactoryRegistry<?, ?> stat) stat.registerStatic();
+    public static void registerAll() {
+        if (locked) throw new RuntimeException("Registries are locked");
+        for (final BuilderRegistry<?, ?> builderRegistry : FACTORY_REGISTRIES.values())
+            if (builderRegistry instanceof BuilderRegistry.Static<?, ?> stat) stat.registerStatic();
     }
 
     public static final EntityActions ENTITY_ACTION = add(new EntityActions("entity_action"));

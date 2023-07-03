@@ -1,5 +1,6 @@
 package io.github.thegatesdev.actionable;
 
+import io.github.thegatesdev.actionable.registry.Registries;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.exception.ElementException;
 import io.github.thegatesdev.maple.read.Readable;
@@ -14,8 +15,8 @@ import java.util.Arrays;
 public class Actionable extends JavaPlugin {
     @Override
     public void onLoad() {
-        Factories.registerAll();
-        Factories.lock();
+        Registries.registerAll();
+        Registries.lock();
     }
 
     public static final Readable<DataValue<PotionEffectType>> EFFECT_TYPE = Readable.value("effect", value ->

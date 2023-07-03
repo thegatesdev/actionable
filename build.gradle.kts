@@ -20,8 +20,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
 
     api("io.github.thegatesdev:maple:")
-    compileOnly("io.github.thegatesdev:eventador:2.0.0")
-    compileOnly("io.github.thegatesdev:threshold:0.2")
+    compileOnly("io.github.thegatesdev:threshold:")
 }
 
 tasks {
