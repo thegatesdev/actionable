@@ -3,6 +3,7 @@ package io.github.thegatesdev.actionable.builder;
 import io.github.thegatesdev.actionable.registry.Builder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
+import io.github.thegatesdev.maple.data.Keyed;
 import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
 import io.github.thegatesdev.threshold.util.twin.Twin;
@@ -14,7 +15,7 @@ import java.util.function.Predicate;
 
 import static io.github.thegatesdev.maple.read.Readable.integer;
 
-public class ActionBuilder<T> implements Builder<Consumer<T>> {
+public class ActionBuilder<T> implements Builder<Consumer<T>>, Keyed {
     private final String key;
     protected final BiConsumer<DataMap, T> effect;
     protected final ReadableOptions readableOptions;
@@ -89,8 +90,7 @@ public class ActionBuilder<T> implements Builder<Consumer<T>> {
     }
 
     @Nonnull
-    @Override
-    public ReadableOptions readableOptions() {
+    public ReadableOptions options() {
         return readableOptions;
     }
 

@@ -27,7 +27,7 @@ Copyright (C) 2022  Timar Karels
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-public abstract class BuilderRegistry<Data, Fac extends Builder<Data>> implements Keyed, DataType<DataValue<Data>> {
+public abstract class BuilderRegistry<Data, B extends Builder<Data>> implements Keyed, DataType<DataValue<Data>> {
     protected final String key;
     protected Info info;
 
@@ -37,7 +37,7 @@ public abstract class BuilderRegistry<Data, Fac extends Builder<Data>> implement
 
     public abstract Collection<String> keys();
 
-    public abstract Fac get(String key);
+    public abstract B get(String key);
 
     @Override
     public DataValue<Data> read(DataElement element) {
@@ -59,8 +59,8 @@ public abstract class BuilderRegistry<Data, Fac extends Builder<Data>> implement
         return info;
     }
 
-    public static class Static<Data, Fac extends Builder<Data>> extends BuilderRegistry<Data, Fac> {
-        private final Map<String, Fac> factories = new HashMap<>();
+    public static class Static<Data, B extends Builder<Data> & Keyed> extends BuilderRegistry<Data, B> {
+        private final Map<String, B> builders = new HashMap<>();
 
         protected Static(String key) {
             super(key);
@@ -71,20 +71,20 @@ public abstract class BuilderRegistry<Data, Fac extends Builder<Data>> implement
         public void registerStatic() {
         }
 
-        public void register(Fac factory) {
-            factories.putIfAbsent(factory.key(), factory);
+        public void register(B builder) {
+            builders.putIfAbsent(builder.key(), builder);
         }
 
         // -- GET
 
         @Override
-        public Fac get(String key) {
-            return factories.get(key);
+        public B get(String key) {
+            return builders.get(key);
         }
 
         @Override
         public Collection<String> keys() {
-            return factories.keySet();
+            return builders.keySet();
         }
     }
 }

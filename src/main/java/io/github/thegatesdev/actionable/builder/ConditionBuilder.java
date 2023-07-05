@@ -3,6 +3,7 @@ package io.github.thegatesdev.actionable.builder;
 import io.github.thegatesdev.actionable.registry.Builder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
+import io.github.thegatesdev.maple.data.Keyed;
 import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
 import io.github.thegatesdev.threshold.util.twin.Twin;
@@ -11,7 +12,7 @@ import javax.annotation.Nonnull;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-public class ConditionBuilder<R> implements Builder<Predicate<R>> {
+public class ConditionBuilder<R> implements Builder<Predicate<R>>, Keyed {
     private final String key;
     private final BiPredicate<DataMap, R> predicate;
     private final ReadableOptions readableOptions;
@@ -80,8 +81,7 @@ public class ConditionBuilder<R> implements Builder<Predicate<R>> {
     }
 
     @Nonnull
-    @Override
-    public ReadableOptions readableOptions() {
+    public ReadableOptions options() {
         return readableOptions;
     }
 
