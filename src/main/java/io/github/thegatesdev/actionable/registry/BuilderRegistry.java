@@ -5,7 +5,7 @@ import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
 import io.github.thegatesdev.maple.exception.ElementException;
-import io.github.thegatesdev.maple.read.struct.DataType;
+import io.github.thegatesdev.maple.read.struct.AbstractDataType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,12 +27,10 @@ Copyright (C) 2022  Timar Karels
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-public abstract class BuilderRegistry<Data, B extends Builder<Data>> implements Keyed, DataType<DataValue<Data>> {
-    protected final String key;
-    protected Info info;
+public abstract class BuilderRegistry<Data, B extends Builder<? extends Data>> extends AbstractDataType<DataValue<Data>> implements Keyed {
 
     protected BuilderRegistry(String key) {
-        this.key = key;
+        super(key);
     }
 
     public abstract Collection<String> keys();
@@ -48,18 +46,7 @@ public abstract class BuilderRegistry<Data, B extends Builder<Data>> implements 
         return DataValue.of(factory.build(data));
     }
 
-    @Override
-    public String key() {
-        return key;
-    }
-
-    @Override
-    public Info info() {
-        if (info == null) info = new Info(key);
-        return info;
-    }
-
-    public static class Static<Data, B extends Builder<Data> & Keyed> extends BuilderRegistry<Data, B> {
+    public static class Static<Data, B extends Builder<? extends Data> & Keyed> extends BuilderRegistry<Data, B> {
         private final Map<String, B> builders = new HashMap<>();
 
         protected Static(String key) {
