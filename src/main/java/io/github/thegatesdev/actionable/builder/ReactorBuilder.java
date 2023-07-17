@@ -1,8 +1,7 @@
 package io.github.thegatesdev.actionable.builder;
 
 import io.github.thegatesdev.actionable.registry.Builder;
-import io.github.thegatesdev.eventador.listener.struct.EventTypeHolder;
-import io.github.thegatesdev.eventador.listener.struct.StaticListener;
+import io.github.thegatesdev.eventador.listener.struct.ClassListener;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
@@ -90,7 +89,7 @@ public class ReactorBuilder<E extends Event> implements Builder<ReactorBuilder<E
 
     // -- CLASS
 
-    public final class Reactor implements StaticListener<E>, EventTypeHolder<E> {
+    public final class Reactor implements ClassListener<E> {
         private final DataMap data;
         private final ReactorEntry<E, ?>[] entries;
         private final boolean cancel;
