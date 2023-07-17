@@ -2,6 +2,7 @@ package io.github.thegatesdev.actionable.registry;
 
 import io.github.thegatesdev.actionable.builder.action.*;
 import io.github.thegatesdev.actionable.builder.condition.*;
+import io.github.thegatesdev.actionable.builder.reactor.Reactors;
 
 import java.util.*;
 
@@ -39,6 +40,8 @@ public class Registries {
         for (final BuilderRegistry<?, ?> builderRegistry : FACTORY_REGISTRIES.values())
             if (builderRegistry instanceof BuilderRegistry.Static<?, ?> stat) stat.registerStatic();
     }
+
+    public static final Reactors REACTORS = add(new Reactors("reactors"));
 
     public static final EntityActions ENTITY_ACTION = add(new EntityActions("entity_action"));
     public static final WorldActions WORLD_ACTION = add(new WorldActions("world_action"));
