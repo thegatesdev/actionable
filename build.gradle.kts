@@ -5,7 +5,7 @@ plugins {
 
 group = "io.github.thegatesdev"
 version = "2.0"
-description = "Data driven actions, conditions and event listening."
+description = "Data driven actions, conditions and event reacting."
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 java {
@@ -21,16 +21,17 @@ dependencies {
 
     api("io.github.thegatesdev:maple:")
     compileOnly("io.github.thegatesdev:threshold:")
+    compileOnly("io.github.thegatesdev:eventador:")
 }
 
 tasks {
     processResources {
         filteringCharset = Charsets.UTF_8.name()
         val props = mapOf(
-            "name" to project.name,
-            "version" to project.version,
-            "description" to project.description,
-            "apiVersion" to "'1.20'"
+                "name" to project.name,
+                "version" to project.version,
+                "description" to project.description,
+                "apiVersion" to "'1.20'"
         )
         inputs.properties(props)
         filesMatching("plugin.yml") {
