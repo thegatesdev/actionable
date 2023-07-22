@@ -38,11 +38,11 @@ public final class EntityLocationActions extends BuilderRegistry.Static<Consumer
         }));
 
         register(new ActionBuilder<>("run_in_world", (data, twin) -> data.<Consumer<World>>getUnsafe("action").accept(twin.target().getWorld()), new ReadableOptions()
-                .add("action", WORLD_ACTION)
+            .add("action", WORLD_ACTION)
         ));
 
         register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Location>>getUnsafe("action").accept(twin.target()), new ReadableOptions()
-                .add("action", LOCATION_ACTION)
+            .add("action", LOCATION_ACTION)
         ));
     }
 }

@@ -1,6 +1,6 @@
 package io.github.thegatesdev.actionable.builder;
 
-import io.github.thegatesdev.actionable.registry.Builder;
+import io.github.thegatesdev.actionable.registry.DataBuilder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-public class ConditionBuilder<R> implements Builder<Predicate<R>>, Keyed {
+public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
     private final String key;
     private final BiPredicate<DataMap, R> predicate;
     private final ReadableOptions readableOptions;
@@ -38,8 +38,8 @@ public class ConditionBuilder<R> implements Builder<Predicate<R>>, Keyed {
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
             return targetC != null && targetC.test(twin.target());
         }, new ReadableOptions()
-                .addOptional("actor_condition", actorCondition)
-                .addOptional("target_condition", targetCondition)
+            .addOptional("actor_condition", actorCondition)
+            .addOptional("target_condition", targetCondition)
         );
     }
 
@@ -50,8 +50,8 @@ public class ConditionBuilder<R> implements Builder<Predicate<R>>, Keyed {
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
             return targetC != null && targetC.test(twin.target());
         }, new ReadableOptions()
-                .addOptional("actor_condition", actorCondition)
-                .addOptional("target_condition", targetCondition)
+            .addOptional("actor_condition", actorCondition)
+            .addOptional("target_condition", targetCondition)
         );
     }
 
@@ -81,7 +81,7 @@ public class ConditionBuilder<R> implements Builder<Predicate<R>>, Keyed {
     }
 
     @Nonnull
-    public ReadableOptions options() {
+    public ReadableOptions readableOptions() {
         return readableOptions;
     }
 

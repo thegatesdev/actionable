@@ -44,8 +44,8 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
                     if (condition.test(player)) action.accept(player);
                 }
         }, new ReadableOptions()
-                .add("action", ENTITY_ACTION)
-                .addOptional("condition", ENTITY_CONDITION)
+            .add("action", ENTITY_ACTION)
+            .addOptional("condition", ENTITY_CONDITION)
         ));
         register(new ActionBuilder<>("each_entity", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -59,14 +59,14 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
                     if (condition.test(entity)) action.accept(entity);
                 }
         }, new ReadableOptions()
-                .add("action", ENTITY_ACTION)
-                .addOptional("condition", ENTITY_CONDITION)
-                .add("living", bool(), false)
+            .add("action", ENTITY_ACTION)
+            .addOptional("condition", ENTITY_CONDITION)
+            .add("living", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()
-                .add("location", VECTOR)
-                .add("action", LOCATION_ACTION)
+            .add("location", VECTOR)
+            .add("action", LOCATION_ACTION)
         ));
     }
 }

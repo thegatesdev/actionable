@@ -41,9 +41,9 @@ public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<T
             if (data.getBoolean("set")) launched.setVelocity(direction);
             else launched.setVelocity(launched.getVelocity().add(direction));
         }, new ReadableOptions()
-                .add("amount", number(), 1)
-                .add("up", number(), 0)
-                .add("set", bool(), false)
+            .add("amount", number(), 1)
+            .add("up", number(), 0)
+            .add("set", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", ENTITY_LOCATION_ACTION)));

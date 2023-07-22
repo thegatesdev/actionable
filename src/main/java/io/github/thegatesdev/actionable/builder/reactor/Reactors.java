@@ -2,6 +2,7 @@ package io.github.thegatesdev.actionable.builder.reactor;
 
 import io.github.thegatesdev.actionable.builder.ReactorBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
+import io.github.thegatesdev.eventador.listener.struct.ClassListener;
 import io.github.thegatesdev.maple.read.Readable;
 import io.github.thegatesdev.maple.read.ReadableOptions;
 import org.bukkit.event.block.Action;
@@ -9,10 +10,12 @@ import org.bukkit.event.player.*;
 
 import static io.github.thegatesdev.actionable.registry.Registries.*;
 
-public class Reactors extends BuilderRegistry.Static<ReactorBuilder<?>.Reactor, ReactorBuilder<?>> {
+public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBuilder<?>> {
     public Reactors(String key) {
         super(key);
     }
+
+    // TODO Get by event
 
     @Override
     public void registerStatic() {
@@ -40,7 +43,7 @@ public class Reactors extends BuilderRegistry.Static<ReactorBuilder<?>.Reactor, 
         register(new ReactorBuilder<>("item_break", PlayerItemBreakEvent.class)
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
         );
-        register(new ReactorBuilder<>("item_pick_up", PlayerAttemptPickupItemEvent.class, new ReadableOptions()
+        register(new ReactorBuilder<>("item_grab_attempt", PlayerAttemptPickupItemEvent.class, new ReadableOptions()
             .add("fly_at_player", Readable.bool(), true))
             .action((data, event) -> event.setFlyAtPlayer(data.getBoolean("fly_at_player")))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)

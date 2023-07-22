@@ -1,6 +1,6 @@
 package io.github.thegatesdev.actionable.builder;
 
-import io.github.thegatesdev.actionable.registry.Builder;
+import io.github.thegatesdev.actionable.registry.DataBuilder;
 import io.github.thegatesdev.eventador.listener.struct.ClassListener;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
@@ -8,7 +8,6 @@ import io.github.thegatesdev.maple.data.Keyed;
 import io.github.thegatesdev.maple.read.Readable;
 import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
-import io.github.thegatesdev.maple.read.struct.ReadableOptionsHolder;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.*;
 
-public class ReactorBuilder<E extends Event> implements Builder<ReactorBuilder<E>.Reactor>, Keyed, ReadableOptionsHolder {
+public class ReactorBuilder<E extends Event> implements DataBuilder<ClassListener<E>>, Keyed {
     private final String key;
 
     private final Class<E> eventClass;
@@ -40,7 +39,7 @@ public class ReactorBuilder<E extends Event> implements Builder<ReactorBuilder<E
     // -- BUILD
 
     @Override
-    public Reactor build(DataMap data) {
+    public ClassListener<E> build(DataMap data) {
         return new Reactor(data, buildEntries(data));
     }
 
@@ -89,7 +88,7 @@ public class ReactorBuilder<E extends Event> implements Builder<ReactorBuilder<E
 
     // -- CLASS
 
-    public final class Reactor implements ClassListener<E> {
+    private final class Reactor implements ClassListener<E> {
         private final DataMap data;
         private final ReactorEntry<E, ?>[] entries;
         private final boolean cancel;

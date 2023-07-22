@@ -9,12 +9,12 @@ import java.util.*;
 public class Registries {
     private static boolean locked = false;
 
-    private static final Map<String, BuilderRegistry<?, ?>> FACTORY_REGISTRIES = new HashMap<>();
-    private static final Map<String, BuilderRegistry<?, ?>> VIEW = Collections.unmodifiableMap(FACTORY_REGISTRIES);
+    private static final Map<String, BuilderRegistry<?, ?>> BUILDERS = new HashMap<>();
+    private static final Map<String, BuilderRegistry<?, ?>> VIEW = Collections.unmodifiableMap(BUILDERS);
 
     public static <F extends BuilderRegistry<?, ?>> F add(F f) {
         if (locked) throw new RuntimeException("Registries are locked");
-        if (FACTORY_REGISTRIES.putIfAbsent(f.key(), f) != null)
+        if (BUILDERS.putIfAbsent(f.key(), f) != null)
             throw new RuntimeException("Duplicate factory entry " + f.key());
         return f;
     }
@@ -28,7 +28,7 @@ public class Registries {
     }
 
     public static BuilderRegistry<?, ?> get(String key) {
-        return FACTORY_REGISTRIES.get(key);
+        return BUILDERS.get(key);
     }
 
     public static void lock() {
@@ -37,11 +37,11 @@ public class Registries {
 
     public static void registerAll() {
         if (locked) throw new RuntimeException("Registries are locked");
-        for (final BuilderRegistry<?, ?> builderRegistry : FACTORY_REGISTRIES.values())
+        for (final BuilderRegistry<?, ?> builderRegistry : BUILDERS.values())
             if (builderRegistry instanceof BuilderRegistry.Static<?, ?> stat) stat.registerStatic();
     }
 
-    public static final Reactors REACTORS = add(new Reactors("reactors"));
+    public static final Reactors REACTORS = add(new Reactors("reactor"));
 
     public static final EntityActions ENTITY_ACTION = add(new EntityActions("entity_action"));
     public static final WorldActions WORLD_ACTION = add(new WorldActions("world_action"));

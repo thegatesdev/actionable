@@ -49,23 +49,23 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
             data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(entity, loc.add(offset)));
         }, new ReadableOptions()
-                .add("offset", VECTOR, new Vector(0, 0, 0))
-                .add("action", ENTITY_LOCATION_ACTION)
-                .add("relative", bool(), false)
+            .add("offset", VECTOR, new Vector(0, 0, 0))
+            .add("action", ENTITY_LOCATION_ACTION)
+            .add("relative", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new ReadableOptions()
-                .add("action", WORLD_ACTION)
+            .add("action", WORLD_ACTION)
         ));
 
         register(new ActionBuilder<>("send_message", (data, entity) -> entity.sendMessage(data.<Component>getUnsafe("message")), new ReadableOptions()
-                .add("message", COLORED_STRING)
+            .add("message", COLORED_STRING)
         ));
 
         register(new ActionBuilder<>("run_command", (data, entity) -> {
             if (entity instanceof Player player) player.performCommand(data.getString("command"));
         }, new ReadableOptions()
-                .add("command", string())
+            .add("command", string())
         ));
 
         register(new ActionBuilder<>("swing_hand", (data, entity) -> {
@@ -75,7 +75,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 else if (slot == EquipmentSlot.OFF_HAND) livingEntity.swingOffHand();
             }
         }, new ReadableOptions()
-                .add("hand", enumeration(EquipmentSlot.class))
+            .add("hand", enumeration(EquipmentSlot.class))
         ));
 
         register(new ActionBuilder<>("drop_slot", (data, entity) -> {
@@ -89,8 +89,8 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 if (droppedItemAction != null) droppedItemAction.accept(Twin.of(entity, item));
             }
         }, new ReadableOptions()
-                .add("slot", integer())
-                .addOptional("drop_action", ENTITY_ENTITY_ACTION)
+            .add("slot", integer())
+            .addOptional("drop_action", ENTITY_ENTITY_ACTION)
         ));
 
         register(new ActionBuilder<>("velocity", (data, entity) -> {
@@ -99,9 +99,9 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             if (data.getBoolean("set")) entity.setVelocity(dir);
             else entity.setVelocity(entity.getVelocity().add(dir));
         }, new ReadableOptions()
-                .add("direction", VECTOR)
-                .add("set", bool(), true)
-                .add("relative", bool(), false)
+            .add("direction", VECTOR)
+            .add("set", bool(), true)
+            .add("relative", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_in_area", (data, entity) -> {
@@ -124,18 +124,18 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 if (++i > maxEntities) return;
             }
         }, new ReadableOptions()
-                .add("range", VECTOR, new Vector(10, 10, 10))
-                .add("include_self", bool(), false)
-                .add("max_entities", integer(), 10)
-                .addOptional("condition", ENTITY_ENTITY_CONDITION)
-                .add("action", ENTITY_ENTITY_ACTION)
-                .after(data -> { // Generate predicate with all conditions
-                    Predicate<Twin<Entity, Entity>> out = twin -> twin.actor().isValid() && twin.target().isValid();
-                    if (!data.getBoolean("include_self")) out = out.and(twin -> !twin.areEqual());
-                    final Predicate<Twin<Entity, Entity>> entityCondition = data.getUnsafe("condition", null);
-                    if (entityCondition != null) out = out.and(entityCondition);
-                    data.set("_pred", out);
-                })
+            .add("range", VECTOR, new Vector(10, 10, 10))
+            .add("include_self", bool(), false)
+            .add("max_entities", integer(), 10)
+            .addOptional("condition", ENTITY_ENTITY_CONDITION)
+            .add("action", ENTITY_ENTITY_ACTION)
+            .after(data -> { // Generate predicate with all conditions
+                Predicate<Twin<Entity, Entity>> out = twin -> twin.actor().isValid() && twin.target().isValid();
+                if (!data.getBoolean("include_self")) out = out.and(twin -> !twin.areEqual());
+                final Predicate<Twin<Entity, Entity>> entityCondition = data.getUnsafe("condition", null);
+                if (entityCondition != null) out = out.and(entityCondition);
+                data.set("_pred", out);
+            })
         ));
 
         register(new ActionBuilder<>("teleport", (data, entity) -> {
@@ -143,16 +143,16 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             if (data.getBoolean("relative")) entity.teleport(entity.getLocation().add(where));
             else entity.teleport(where.toLocation(entity.getWorld()));
         }, new ReadableOptions()
-                .add("where", VECTOR)
-                .add("relative", bool(), false)
+            .add("where", VECTOR)
+            .add("relative", bool(), false)
         ));
 
         register(new ActionBuilder<>("set_fire", (data, entity) -> {
             final int fireTicks = data.getInt("ticks");
             if (data.getBoolean("force") || entity.getFireTicks() < fireTicks) entity.setFireTicks(fireTicks);
         }, new ReadableOptions()
-                .add("ticks", integer(), 1000)
-                .add("force", bool(), false)
+            .add("ticks", integer(), 1000)
+            .add("force", bool(), false)
         ));
 
         enum RaycastType {
@@ -215,23 +215,23 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                     rayAction.accept(twin.setTarget(l.set(position.getX(), position.getY(), position.getZ())));
             }
         }, new ReadableOptions()
-                .add("max_distance", number(), 100)
-                .add("step_distance", number(), 1)
-                .add("ray_size", number(), 1)
-                .addOptional("offset", VECTOR)
-                .addOptional("ray_action", ENTITY_LOCATION_ACTION)
-                .addOptional("hit_action", ENTITY_LOCATION_ACTION)
-                .addOptional("relative_hit_action", ENTITY_LOCATION_ACTION)
-                .addOptional("hit_entity_action", ENTITY_ENTITY_ACTION)
-                .addOptional("hit_entity_condition", ENTITY_ENTITY_CONDITION)
-                .add("cast_type", enumeration(RaycastType.class), RaycastType.BOTH)
+            .add("max_distance", number(), 100)
+            .add("step_distance", number(), 1)
+            .add("ray_size", number(), 1)
+            .addOptional("offset", VECTOR)
+            .addOptional("ray_action", ENTITY_LOCATION_ACTION)
+            .addOptional("hit_action", ENTITY_LOCATION_ACTION)
+            .addOptional("relative_hit_action", ENTITY_LOCATION_ACTION)
+            .addOptional("hit_entity_action", ENTITY_ENTITY_ACTION)
+            .addOptional("hit_entity_condition", ENTITY_ENTITY_CONDITION)
+            .add("cast_type", enumeration(RaycastType.class), RaycastType.BOTH)
         ));
 
         register(new ActionBuilder<>("damage", (data, entity) -> {
             if (entity instanceof LivingEntity livingEntity)
                 livingEntity.damage(data.getDouble("amount"), entity.getUniqueId() == livingEntity.getUniqueId() ? null : entity);
         }, new ReadableOptions()
-                .add("amount", number(), 1)
+            .add("amount", number(), 1)
         ));
 
         register(new ActionBuilder<>("effect", (data, entity) -> {
@@ -243,13 +243,13 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                     livingEntity.addPotionEffect(new PotionEffect(type, data.getInt("duration"), data.getInt("amplifier"), data.getBoolean("is_ambient"), data.getBoolean("show_particles"), data.getBoolean("show_icon")));
             }
         }, new ReadableOptions()
-                .add("effect", EFFECT_TYPE)
-                .add("remove", bool(), false)
-                .add("duration", integer(), 20)
-                .add("amplifier", integer(), 0)
-                .add("is_ambient", bool(), false)
-                .add("show_particles", bool(), true)
-                .add("show_icon", bool(), true)
+            .add("effect", EFFECT_TYPE)
+            .add("remove", bool(), false)
+            .add("duration", integer(), 20)
+            .add("amplifier", integer(), 0)
+            .add("is_ambient", bool(), false)
+            .add("show_particles", bool(), true)
+            .add("show_icon", bool(), true)
         ));
 
         register(new ActionBuilder<>("dismount", (data, entity) -> {

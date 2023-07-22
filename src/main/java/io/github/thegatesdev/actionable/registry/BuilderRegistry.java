@@ -27,10 +27,11 @@ Copyright (C) 2022  Timar Karels
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-public abstract class BuilderRegistry<Data, B extends Builder<? extends Data>> extends AbstractDataType<DataValue<Data>> implements Keyed {
+public abstract class BuilderRegistry<Data, B extends DataBuilder<? extends Data>> extends AbstractDataType<DataValue<Data>> implements Keyed {
 
     protected BuilderRegistry(String key) {
         super(key);
+        info().description("Creates '" + key + "' using the type and the " + key + " specific options");
     }
 
     public abstract Collection<String> keys();
@@ -46,7 +47,8 @@ public abstract class BuilderRegistry<Data, B extends Builder<? extends Data>> e
         return DataValue.of(factory.build(data));
     }
 
-    public static class Static<Data, B extends Builder<? extends Data> & Keyed> extends BuilderRegistry<Data, B> {
+
+    public static class Static<Data, B extends DataBuilder<? extends Data> & Keyed> extends BuilderRegistry<Data, B> {
         private final Map<String, B> builders = new HashMap<>();
 
         protected Static(String key) {

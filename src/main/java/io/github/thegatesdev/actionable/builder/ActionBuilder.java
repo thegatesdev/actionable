@@ -1,6 +1,6 @@
 package io.github.thegatesdev.actionable.builder;
 
-import io.github.thegatesdev.actionable.registry.Builder;
+import io.github.thegatesdev.actionable.registry.DataBuilder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 import static io.github.thegatesdev.maple.read.Readable.integer;
 
-public class ActionBuilder<T> implements Builder<Consumer<T>>, Keyed {
+public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
     private final String key;
     protected final BiConsumer<DataMap, T> effect;
     protected final ReadableOptions readableOptions;
@@ -32,8 +32,8 @@ public class ActionBuilder<T> implements Builder<Consumer<T>>, Keyed {
 
     public static <T> ActionBuilder<T> moreFactory(DataTypeHolder<DataValue<Consumer<T>>> dataType) {
         return new ActionBuilder<>("more", (data, t) ->
-                data.getList("actions").each(element -> element.asValue().<Consumer<T>>valueUnsafe().accept(t)),
-                new ReadableOptions().add("actions", dataType.dataType().list()));
+            data.getList("actions").each(element -> element.asValue().<Consumer<T>>valueUnsafe().accept(t)),
+            new ReadableOptions().add("actions", dataType.dataType().list()));
     }
 
     public static <T> ActionBuilder<T> loopFactory(DataTypeHolder<DataValue<Consumer<T>>> loopedActionType) {
@@ -66,8 +66,8 @@ public class ActionBuilder<T> implements Builder<Consumer<T>>, Keyed {
             if (actorA != null) actorA.accept(twin.actor());
             if (targetA != null) targetA.accept(twin.target());
         }, new ReadableOptions()
-                .addOptional("actor_action", actorAction)
-                .addOptional("target_action", targetAction)
+            .addOptional("actor_action", actorAction)
+            .addOptional("target_action", targetAction)
         );
     }
 
@@ -79,9 +79,9 @@ public class ActionBuilder<T> implements Builder<Consumer<T>>, Keyed {
             if (condition.test(t)) ifAction.accept(t);
             else data.ifValue("else_action", value -> value.<Consumer<T>>valueUnsafe().accept(t));
         }, new ReadableOptions()
-                .add("condition", conditionDataType)
-                .add("if_action", actionDataType)
-                .addOptional("else_action", actionDataType)
+            .add("condition", conditionDataType)
+            .add("if_action", actionDataType)
+            .addOptional("else_action", actionDataType)
         );
     }
 
@@ -90,7 +90,7 @@ public class ActionBuilder<T> implements Builder<Consumer<T>>, Keyed {
     }
 
     @Nonnull
-    public ReadableOptions options() {
+    public ReadableOptions readableOptions() {
         return readableOptions;
     }
 

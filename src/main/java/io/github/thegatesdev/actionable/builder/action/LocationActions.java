@@ -34,12 +34,12 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             if (data.getBoolean("relative")) dir = location.getDirection().multiply(dir);
             location.add(dir);
         }, new ReadableOptions()
-                .add("direction", VECTOR)
-                .add("relative", bool(), false)
+            .add("direction", VECTOR)
+            .add("relative", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
-                .add("action", WORLD_ACTION)
+            .add("action", WORLD_ACTION)
         ));
 
         register(new ActionBuilder<>("play_sound", (data, location) -> {
@@ -50,9 +50,9 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             float volume = data.getFloat("volume");
             world.playSound(location, sound, SoundCategory.AMBIENT, volume, pitch);
         }, new ReadableOptions()
-                .add("sound", enumeration(Sound.class))
-                .add("pitch", number(), 0)
-                .add("volume", number(), 1f)
+            .add("sound", enumeration(Sound.class))
+            .add("pitch", number(), 0)
+            .add("volume", number(), 1f)
         ));
 
         register(new ActionBuilder<>("fill", (data, location) -> {
@@ -66,9 +66,9 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             mod.fill(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), material);
             mod.update();
         }, new ReadableOptions()
-                .add("from", VECTOR)
-                .add("to", VECTOR)
-                .add("block", enumeration(Material.class))
+            .add("from", VECTOR)
+            .add("to", VECTOR)
+            .add("block", enumeration(Material.class))
         ));
 
         register(new ActionBuilder<>("set_block", (data, location) -> {
@@ -93,12 +93,12 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final Vector vector = data.getObject("vector", Vector.class);
             world.spawnParticle(particle, location.add(data.getObject("offset", Vector.class)), data.getInt("amount"), vector.getX(), vector.getY(), vector.getZ(), particleData);
         }, new ReadableOptions()
-                .add("particle", enumeration(Particle.class))
-                .addOptional("material", enumeration(Material.class))
-                .add("amount", number(), 1)
-                .add("speed", number(), 1d)
-                .add("offset", VECTOR, new Vector())
-                .add("vector", VECTOR, new Vector())
+            .add("particle", enumeration(Particle.class))
+            .addOptional("material", enumeration(Material.class))
+            .add("amount", number(), 1)
+            .add("speed", number(), 1d)
+            .add("offset", VECTOR, new Vector())
+            .add("vector", VECTOR, new Vector())
         ));
 
         register(new ActionBuilder<>("summon", (data, location) -> {
@@ -110,8 +110,8 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final Consumer<Entity> mobAction = data.getUnsafe("action", null);
             if (mobAction != null) mobAction.accept(spawnedEntity);
         }, new ReadableOptions()
-                .add("entity_type", enumeration(EntityType.class))
-                .addOptional("action", ENTITY_ACTION)
+            .add("entity_type", enumeration(EntityType.class))
+            .addOptional("action", ENTITY_ACTION)
         ));
 
         register(new ActionBuilder<>("lightning", (data, location) -> {
@@ -121,8 +121,8 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
                 world.spigot().strikeLightning(location, data.getBoolean("silent"));
             else world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
         }, new ReadableOptions()
-                .add("damage", bool(), true)
-                .add("silent", bool(), false)
+            .add("damage", bool(), true)
+            .add("silent", bool(), false)
         ));
     }
 }

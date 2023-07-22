@@ -24,9 +24,9 @@ public final class WorldConditions extends BuilderRegistry.Static<Predicate<Worl
         register(ConditionBuilder.orFactory(WORLD_CONDITION));
         register(new ConditionBuilder<>("is_clear_weather", (data, world) -> world.isClearWeather()));
         register(new ConditionBuilder<>("run_at", (data, world) ->
-                data.<Predicate<Location>>getUnsafe("condition").test(data.getUnsafe("location")),
-                new ReadableOptions()
-                        .add("condition", LOCATION_CONDITION)
-                        .add("location", VECTOR)));
+            data.<Predicate<Location>>getUnsafe("condition").test(data.getUnsafe("location")),
+            new ReadableOptions()
+                .add("condition", LOCATION_CONDITION)
+                .add("location", VECTOR)));
     }
 }
