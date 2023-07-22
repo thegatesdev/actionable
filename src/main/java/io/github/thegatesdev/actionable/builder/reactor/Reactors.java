@@ -5,12 +5,13 @@ import io.github.thegatesdev.actionable.registry.BuilderRegistry;
 import io.github.thegatesdev.eventador.listener.struct.ClassListener;
 import io.github.thegatesdev.maple.read.Readable;
 import io.github.thegatesdev.maple.read.ReadableOptions;
+import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
 
 import static io.github.thegatesdev.actionable.registry.Registries.*;
 
-public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBuilder<?>> {
+public class Reactors extends BuilderRegistry.Static<ClassListener<? extends Event>, ReactorBuilder<?>> {
     public Reactors(String key) {
         super(key);
     }
