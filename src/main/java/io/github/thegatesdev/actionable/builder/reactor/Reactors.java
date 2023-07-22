@@ -15,8 +15,6 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBu
         super(key);
     }
 
-    // TODO Get by event
-
     @Override
     public void registerStatic() {
         register(new ReactorBuilder<>("click", PlayerInteractEvent.class, new ReadableOptions()
