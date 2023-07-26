@@ -9,12 +9,31 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static io.github.thegatesdev.actionable.registry.Registries.*;
 
 public class Reactors extends BuilderRegistry.Static<ClassListener<? extends Event>, ReactorBuilder<?>> {
+    private final Map<Class<?>, ReactorBuilder<?>> byEventClass = new HashMap<>();
+
     public Reactors(String key) {
         super(key);
     }
+
+    @Override
+    public void register(ReactorBuilder<?> builder) {
+        byEventClass.computeIfAbsent(builder.eventClass(), aClass -> {
+            super.register(builder);
+            return builder;
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E extends Event> ReactorBuilder<E> get(Class<E> eventClass) {
+        return (ReactorBuilder<E>) byEventClass.get(eventClass);
+    }
+
 
     @Override
     public void registerStatic() {
