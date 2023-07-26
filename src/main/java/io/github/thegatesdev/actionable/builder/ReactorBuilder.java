@@ -86,6 +86,10 @@ public class ReactorBuilder<E extends Event> implements DataBuilder<ClassListene
         return options;
     }
 
+    public Class<E> eventClass() {
+        return eventClass;
+    }
+
     // -- CLASS
 
     private final class Reactor implements ClassListener<E> {
