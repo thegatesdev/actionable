@@ -2,9 +2,9 @@ package io.github.thegatesdev.actionable.builder.reactor;
 
 import io.github.thegatesdev.actionable.builder.ReactorBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
-import io.github.thegatesdev.eventador.listener.struct.ClassListener;
 import io.github.thegatesdev.maple.read.Readable;
 import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.threshold.event.listening.ClassListener;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
@@ -37,6 +37,10 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<? extends Eve
 
     @Override
     public void registerStatic() {
+        register(simplePlayer("slot_change", PlayerItemHeldEvent.class));
+        register(simplePlayer("item_break", PlayerItemBreakEvent.class));
+        register(simplePlayer("item_consume", PlayerItemConsumeEvent.class));
+
         register(new ReactorBuilder<>("click", PlayerInteractEvent.class, new ReadableOptions()
             .add("click_type", Readable.enumeration(ClickType.class), ClickType.ANY)
             .add("click_location", Readable.enumeration(ClickLocation.class), ClickLocation.ANY))
@@ -55,18 +59,17 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<? extends Eve
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
             .reactor("drop", PlayerDropItemEvent::getItemDrop, ENTITY_CONDITION, ENTITY_ACTION)
         );
-        register(new ReactorBuilder<>("item_consume", PlayerItemConsumeEvent.class)
-            .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
-        );
-        register(new ReactorBuilder<>("item_break", PlayerItemBreakEvent.class)
-            .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
-        );
         register(new ReactorBuilder<>("item_grab_attempt", PlayerAttemptPickupItemEvent.class, new ReadableOptions()
             .add("fly_at_player", Readable.bool(), true))
             .action((data, event) -> event.setFlyAtPlayer(data.getBoolean("fly_at_player")))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
             .reactor("item", PlayerAttemptPickupItemEvent::getItem, ENTITY_CONDITION, ENTITY_ACTION)
         );
+    }
+
+    private static <E extends PlayerEvent> ReactorBuilder<E> simplePlayer(String key, Class<E> eventClass) {
+        return new ReactorBuilder<>(key, eventClass)
+            .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION);
     }
 
     public enum ClickLocation {

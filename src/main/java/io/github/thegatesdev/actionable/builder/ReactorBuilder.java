@@ -1,13 +1,13 @@
 package io.github.thegatesdev.actionable.builder;
 
 import io.github.thegatesdev.actionable.registry.DataBuilder;
-import io.github.thegatesdev.eventador.listener.struct.ClassListener;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
 import io.github.thegatesdev.maple.read.Readable;
 import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
+import io.github.thegatesdev.threshold.event.listening.ClassListener;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
