@@ -31,7 +31,6 @@ public abstract class BuilderRegistry<Data, B extends DataBuilder<? extends Data
 
     protected BuilderRegistry(String key) {
         super(key);
-        info().description("Creates '" + key + "' using the type and the " + key + " specific options");
     }
 
     public abstract Collection<String> keys();

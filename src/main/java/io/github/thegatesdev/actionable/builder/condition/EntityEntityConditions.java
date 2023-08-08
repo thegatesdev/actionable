@@ -13,7 +13,6 @@ import static io.github.thegatesdev.actionable.registry.Registries.ENTITY_ENTITY
 public final class EntityEntityConditions extends BuilderRegistry.Static<Predicate<Twin<Entity, Entity>>, ConditionBuilder<Twin<Entity, Entity>>> {
     public EntityEntityConditions(String id) {
         super(id);
-        info().description("A condition tested between an actor and a target entity.");
     }
 
     @Override

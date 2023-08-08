@@ -2,7 +2,7 @@ package io.github.thegatesdev.actionable.builder.condition;
 
 import io.github.thegatesdev.actionable.builder.ConditionBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
-import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.Options;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
@@ -14,7 +14,6 @@ import static io.github.thegatesdev.maple.read.Readable.enumeration;
 public final class EntityConditions extends BuilderRegistry.Static<Predicate<Entity>, ConditionBuilder<Entity>> {
     public EntityConditions(String id) {
         super(id);
-        info().description("A condition tested on a single entity.");
     }
 
     @Override
@@ -23,7 +22,7 @@ public final class EntityConditions extends BuilderRegistry.Static<Predicate<Ent
         register(ConditionBuilder.andFactory(ENTITY_CONDITION));
 
         register(new ConditionBuilder<>("is_of", (data, entity) -> entity.getType() == data.getObject("entity_type", EntityType.class),
-            new ReadableOptions().add("entity_type", enumeration(EntityType.class))
+            new Options().add("entity_type", enumeration(EntityType.class))
         ));
 
         register(new ConditionBuilder<>("sneaking", (data, entity) -> entity.isSneaking()));

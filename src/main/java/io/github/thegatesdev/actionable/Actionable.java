@@ -10,8 +10,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import java.util.Arrays;
-
 public class Actionable extends JavaPlugin {
     @Override
     public void onLoad() {
@@ -20,19 +18,17 @@ public class Actionable extends JavaPlugin {
     }
 
     public static final Readable<DataValue<PotionEffectType>> EFFECT_TYPE = Readable.value("effect", value ->
-            value.requireType(String.class).then(PotionEffectType.class, effectName -> {
-                PotionEffectType effectType = PotionEffectType.getByName(effectName);
-                if (effectType == null)
-                    throw new ElementException(value, "this effect type does not exist: " + effectName);
-                return effectType;
-            })
-    ).info(info -> info
-            .description("A minecraft potion effect type.")
-            .possibleValues(Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toArray(String[]::new)));
+        value.requireType(String.class).then(PotionEffectType.class, effectName -> {
+            PotionEffectType effectType = PotionEffectType.getByName(effectName);
+            if (effectType == null)
+                throw new ElementException(value, "this effect type does not exist: " + effectName);
+            return effectType;
+        })
+    );
 
     public static final Readable<DataValue<Component>> COLORED_STRING = Readable.value("colored_text", value ->
-            value.requireType(String.class).then(Component.class, text -> MiniMessage.miniMessage().deserialize(text))
-    ).info(info -> info.description("Text that can be formatted with MiniMessage formatting"));
+        value.requireType(String.class).then(Component.class, text -> MiniMessage.miniMessage().deserialize(text))
+    );
 
     public static final Readable<DataValue<Vector>> VECTOR = Readable.any("vector", element -> {
         final DataValue<Number> xVal, yVal, zVal;
@@ -47,9 +43,9 @@ public class Actionable extends JavaPlugin {
         final var vec = new Vector();
 
         return DataValue.of(Vector.class, () -> vec
-                .setX(xVal.doubleValue())
-                .setY(yVal.doubleValue())
-                .setZ(zVal.doubleValue())
+            .setX(xVal.doubleValue())
+            .setY(yVal.doubleValue())
+            .setZ(zVal.doubleValue())
         );
-    }).info(info -> info.description("A vector represents a 3 dimensional point, with x, y and z number values.").representation("A map with x y and z values, or a single value"));
+    });
 }

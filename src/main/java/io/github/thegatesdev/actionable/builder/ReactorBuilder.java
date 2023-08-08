@@ -4,8 +4,8 @@ import io.github.thegatesdev.actionable.registry.DataBuilder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
+import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.maple.read.Readable;
-import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
 import io.github.thegatesdev.threshold.event.listening.ClassListener;
 import org.bukkit.event.Cancellable;
@@ -19,21 +19,21 @@ public class ReactorBuilder<E extends Event> implements DataBuilder<ClassListene
     private final String key;
 
     private final Class<E> eventClass;
-    private final ReadableOptions options;
+    private final Options options;
     private final List<DataEntry<E, ?>> dataEntries = new ArrayList<>();
 
     private final List<BiPredicate<DataMap, E>> staticConditions = new ArrayList<>();
     private final List<BiConsumer<DataMap, E>> staticActions = new ArrayList<>();
 
     public ReactorBuilder(String key, Class<E> eventClass) {
-        this(key, eventClass, new ReadableOptions());
+        this(key, eventClass, new Options());
     }
 
-    public ReactorBuilder(String key, Class<E> eventClass, ReadableOptions readableOptions) {
+    public ReactorBuilder(String key, Class<E> eventClass, Options options) {
         this.key = key;
         this.eventClass = eventClass;
-        this.options = readableOptions;
-        options.add("cancel", Readable.bool(), false);
+        this.options = options;
+        options.addVal("cancel", Readable.bool(), false);
     }
 
     // -- BUILD
@@ -58,9 +58,9 @@ public class ReactorBuilder<E extends Event> implements DataBuilder<ClassListene
         var conditionName = name + "_condition";
         var actionName = name + "_action";
         dataEntries.add(new DataEntry<>(conditionName, actionName, dataGetter));
-        // Make readableOptions handle dataType reading
-        options.addOptional(conditionName, conditionDataType);
-        options.addOptional(actionName, actionDatatype);
+        // Make Options handle dataType reading
+        options.optional(conditionName, conditionDataType);
+        options.optional(actionName, actionDatatype);
         return this;
     }
 
@@ -82,7 +82,7 @@ public class ReactorBuilder<E extends Event> implements DataBuilder<ClassListene
     }
 
     @Override
-    public ReadableOptions readableOptions() {
+    public Options options() {
         return options;
     }
 

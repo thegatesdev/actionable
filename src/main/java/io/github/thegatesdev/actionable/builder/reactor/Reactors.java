@@ -2,8 +2,8 @@ package io.github.thegatesdev.actionable.builder.reactor;
 
 import io.github.thegatesdev.actionable.builder.ReactorBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
+import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.maple.read.Readable;
-import io.github.thegatesdev.maple.read.ReadableOptions;
 import io.github.thegatesdev.threshold.event.listening.ClassListener;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
@@ -41,9 +41,9 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<? extends Eve
         register(simplePlayer("item_break", PlayerItemBreakEvent.class));
         register(simplePlayer("item_consume", PlayerItemConsumeEvent.class));
 
-        register(new ReactorBuilder<>("click", PlayerInteractEvent.class, new ReadableOptions()
-            .add("click_type", Readable.enumeration(ClickType.class), ClickType.ANY)
-            .add("click_location", Readable.enumeration(ClickLocation.class), ClickLocation.ANY))
+        register(new ReactorBuilder<>("click", PlayerInteractEvent.class, new Options()
+            .addVal("click_type", Readable.enumeration(ClickType.class), ClickType.ANY)
+            .addVal("click_location", Readable.enumeration(ClickLocation.class), ClickLocation.ANY))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
             .reactor("spot", PlayerInteractEvent::getInteractionPoint, LOCATION_CONDITION, LOCATION_ACTION)
             .condition((data, event) -> {
@@ -59,8 +59,8 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<? extends Eve
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
             .reactor("drop", PlayerDropItemEvent::getItemDrop, ENTITY_CONDITION, ENTITY_ACTION)
         );
-        register(new ReactorBuilder<>("item_grab_attempt", PlayerAttemptPickupItemEvent.class, new ReadableOptions()
-            .add("fly_at_player", Readable.bool(), true))
+        register(new ReactorBuilder<>("item_grab_attempt", PlayerAttemptPickupItemEvent.class, new Options()
+            .addVal("fly_at_player", Readable.bool(), true))
             .action((data, event) -> event.setFlyAtPlayer(data.getBoolean("fly_at_player")))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
             .reactor("item", PlayerAttemptPickupItemEvent::getItem, ENTITY_CONDITION, ENTITY_ACTION)

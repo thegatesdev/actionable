@@ -4,7 +4,7 @@ import io.github.thegatesdev.actionable.registry.DataBuilder;
 import io.github.thegatesdev.maple.data.DataMap;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.data.Keyed;
-import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.maple.read.struct.DataTypeHolder;
 import io.github.thegatesdev.threshold.util.twin.Twin;
 
@@ -15,20 +15,20 @@ import java.util.function.Predicate;
 public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
     private final String key;
     private final BiPredicate<DataMap, R> predicate;
-    private final ReadableOptions readableOptions;
+    private final Options options;
 
-    public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate, ReadableOptions readableOptions) {
+    public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate, Options options) {
         this.key = key;
         this.predicate = predicate;
-        this.readableOptions = readableOptions;
+        this.options = options;
     }
 
     public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate) {
-        this(key, predicate, new ReadableOptions());
+        this(key, predicate, new Options());
     }
 
     public static <A, T> ConditionBuilder<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Predicate<Twin<T, A>>>> dataType) {
-        return new ConditionBuilder<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new ReadableOptions().add("condition", dataType));
+        return new ConditionBuilder<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new Options().add("condition", dataType));
     }
 
     public static <A, T> ConditionBuilder<Twin<A, T>> splitAndFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
@@ -37,9 +37,9 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
             if (actorC != null && !actorC.test(twin.actor())) return false;
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
             return targetC != null && targetC.test(twin.target());
-        }, new ReadableOptions()
-            .addOptional("actor_condition", actorCondition)
-            .addOptional("target_condition", targetCondition)
+        }, new Options()
+            .optional("actor_condition", actorCondition)
+            .optional("target_condition", targetCondition)
         );
     }
 
@@ -49,9 +49,9 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
             if (actorC != null && actorC.test(twin.actor())) return true;
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
             return targetC != null && targetC.test(twin.target());
-        }, new ReadableOptions()
-            .addOptional("actor_condition", actorCondition)
-            .addOptional("target_condition", targetCondition)
+        }, new Options()
+            .optional("actor_condition", actorCondition)
+            .optional("target_condition", targetCondition)
         );
     }
 
@@ -62,7 +62,7 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
                 if (!list.<Predicate<T>>getUnsafe(i).test(t)) return false;
             }
             return true;
-        }, new ReadableOptions().add("conditions", dataType.dataType().list()));
+        }, new Options().add("conditions", dataType.dataType().list()));
     }
 
     public static <T> ConditionBuilder<T> orFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
@@ -72,17 +72,17 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
                 if (list.<Predicate<T>>getUnsafe(i).test(t)) return true;
             }
             return false;
-        }, new ReadableOptions().add("conditions", dataType.dataType().list()));
+        }, new Options().add("conditions", dataType.dataType().list()));
     }
 
     @Override
     public Predicate<R> build(DataMap data) {
-        return new Condition<>(this.predicate, readableOptions.read(data), data.getBoolean("reverse", false));
+        return new Condition<>(this.predicate, Options.read(options, data), data.getBoolean("reverse", false));
     }
 
     @Nonnull
-    public ReadableOptions readableOptions() {
-        return readableOptions;
+    public Options options() {
+        return options;
     }
 
     @Override

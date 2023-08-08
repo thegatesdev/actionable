@@ -2,7 +2,7 @@ package io.github.thegatesdev.actionable.builder.action;
 
 import io.github.thegatesdev.actionable.builder.ActionBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
-import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.Options;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -21,7 +21,6 @@ import static io.github.thegatesdev.maple.read.Readable.bool;
 public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, ActionBuilder<World>> {
     public WorldActions(String id) {
         super(id);
-        info().description("An action executed on a world.");
     }
 
     @Override
@@ -31,7 +30,7 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
         register(ActionBuilder.loopFactory(WORLD_ACTION));
         register(ActionBuilder.loopWhileFactory(WORLD_ACTION, WORLD_CONDITION));
 
-        register(new ActionBuilder<>("broadcast_message", (data, world) -> world.sendMessage(data.getUnsafe("message")), new ReadableOptions().add("message", COLORED_STRING)));
+        register(new ActionBuilder<>("broadcast_message", (data, world) -> world.sendMessage(data.getUnsafe("message")), new Options().add("message", COLORED_STRING)));
 
         register(new ActionBuilder<>("each_player", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -43,9 +42,9 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
                 for (Player player : world.getPlayers()) {
                     if (condition.test(player)) action.accept(player);
                 }
-        }, new ReadableOptions()
+        }, new Options()
             .add("action", ENTITY_ACTION)
-            .addOptional("condition", ENTITY_CONDITION)
+            .optional("condition", ENTITY_CONDITION)
         ));
         register(new ActionBuilder<>("each_entity", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -58,13 +57,13 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
                 for (Entity entity : toLoop) {
                     if (condition.test(entity)) action.accept(entity);
                 }
-        }, new ReadableOptions()
+        }, new Options()
             .add("action", ENTITY_ACTION)
-            .addOptional("condition", ENTITY_CONDITION)
-            .add("living", bool(), false)
+            .optional("condition", ENTITY_CONDITION)
+            .addVal("living", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new ReadableOptions()
+        register(new ActionBuilder<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new Options()
             .add("location", VECTOR)
             .add("action", LOCATION_ACTION)
         ));

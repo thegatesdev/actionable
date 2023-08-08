@@ -2,7 +2,7 @@ package io.github.thegatesdev.actionable.builder.action;
 
 import io.github.thegatesdev.actionable.builder.ActionBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
-import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.threshold.world.WorldModification;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
@@ -19,7 +19,6 @@ import static io.github.thegatesdev.maple.read.Readable.*;
 public final class LocationActions extends BuilderRegistry.Static<Consumer<Location>, ActionBuilder<Location>> {
     public LocationActions(String id) {
         super(id);
-        info().description("An action executed at a location in a world.");
     }
 
     @Override
@@ -33,12 +32,12 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             Vector dir = data.getUnsafe("direction");
             if (data.getBoolean("relative")) dir = location.getDirection().multiply(dir);
             location.add(dir);
-        }, new ReadableOptions()
+        }, new Options()
             .add("direction", VECTOR)
-            .add("relative", bool(), false)
+            .addVal("relative", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new ReadableOptions()
+        register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new Options()
             .add("action", WORLD_ACTION)
         ));
 
@@ -49,10 +48,10 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             int pitch = data.getInt("pitch");
             float volume = data.getFloat("volume");
             world.playSound(location, sound, SoundCategory.AMBIENT, volume, pitch);
-        }, new ReadableOptions()
+        }, new Options()
             .add("sound", enumeration(Sound.class))
-            .add("pitch", number(), 0)
-            .add("volume", number(), 1f)
+            .addVal("pitch", number(), 0)
+            .addVal("volume", number(), 1f)
         ));
 
         register(new ActionBuilder<>("fill", (data, location) -> {
@@ -65,7 +64,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final var mod = WorldModification.sync(world);
             mod.fill(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), material);
             mod.update();
-        }, new ReadableOptions()
+        }, new Options()
             .add("from", VECTOR)
             .add("to", VECTOR)
             .add("block", enumeration(Material.class))
@@ -75,7 +74,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final World world = location.getWorld();
             if (world == null) return;
             world.getBlockAt(location).setType(data.getUnsafe("block"));
-        }, new ReadableOptions().add("block", enumeration(Material.class))));
+        }, new Options().add("block", enumeration(Material.class))));
 
         register(new ActionBuilder<>("particle", (data, location) -> {
             location.checkFinite();
@@ -92,13 +91,13 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             } else particleData = data.getDouble("speed");
             final Vector vector = data.getObject("vector", Vector.class);
             world.spawnParticle(particle, location.add(data.getObject("offset", Vector.class)), data.getInt("amount"), vector.getX(), vector.getY(), vector.getZ(), particleData);
-        }, new ReadableOptions()
+        }, new Options()
             .add("particle", enumeration(Particle.class))
-            .addOptional("material", enumeration(Material.class))
-            .add("amount", number(), 1)
-            .add("speed", number(), 1d)
-            .add("offset", VECTOR, new Vector())
-            .add("vector", VECTOR, new Vector())
+            .optional("material", enumeration(Material.class))
+            .addVal("amount", number(), 1)
+            .addVal("speed", number(), 1d)
+            .addVal("offset", VECTOR, new Vector())
+            .addVal("vector", VECTOR, new Vector())
         ));
 
         register(new ActionBuilder<>("summon", (data, location) -> {
@@ -109,9 +108,9 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final Entity spawnedEntity = world.spawnEntity(location, entityType);
             final Consumer<Entity> mobAction = data.getUnsafe("action", null);
             if (mobAction != null) mobAction.accept(spawnedEntity);
-        }, new ReadableOptions()
+        }, new Options()
             .add("entity_type", enumeration(EntityType.class))
-            .addOptional("action", ENTITY_ACTION)
+            .optional("action", ENTITY_ACTION)
         ));
 
         register(new ActionBuilder<>("lightning", (data, location) -> {
@@ -120,9 +119,9 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             if (data.getBoolean("damage"))
                 world.spigot().strikeLightning(location, data.getBoolean("silent"));
             else world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
-        }, new ReadableOptions()
-            .add("damage", bool(), true)
-            .add("silent", bool(), false)
+        }, new Options()
+            .addVal("damage", bool(), true)
+            .addVal("silent", bool(), false)
         ));
     }
 }

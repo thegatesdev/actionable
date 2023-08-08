@@ -2,7 +2,7 @@ package io.github.thegatesdev.actionable.builder.condition;
 
 import io.github.thegatesdev.actionable.builder.ConditionBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
-import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.Options;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -14,7 +14,6 @@ import static io.github.thegatesdev.maple.read.Readable.enumeration;
 public final class LocationConditions extends BuilderRegistry.Static<Predicate<Location>, ConditionBuilder<Location>> {
     public LocationConditions(String id) {
         super(id);
-        info().description("A condition tested on a location in a world.");
     }
 
     @Override
@@ -25,8 +24,7 @@ public final class LocationConditions extends BuilderRegistry.Static<Predicate<L
         register(new ConditionBuilder<>("is_air", (data, location) -> location.getBlock().isEmpty()));
         register(new ConditionBuilder<>("is_full", (data, location) -> location.getBlock().getType().isOccluding()));
         register(new ConditionBuilder<>("is_of", (data, location) -> location.getBlock().getType() == data.getUnsafe("material"),
-            new ReadableOptions()
-                .add("material", enumeration(Material.class))
+            new Options().add("material", enumeration(Material.class))
         ));
     }
 }

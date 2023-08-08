@@ -13,7 +13,6 @@ import static io.github.thegatesdev.actionable.registry.Registries.*;
 public final class EntityLocationConditions extends BuilderRegistry.Static<Predicate<Twin<Entity, Location>>, ConditionBuilder<Twin<Entity, Location>>> {
     public EntityLocationConditions(String id) {
         super(id);
-        info().description("A condition tested between an actor entity and a target location.");
     }
 
     @Override

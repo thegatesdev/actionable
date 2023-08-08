@@ -2,7 +2,7 @@ package io.github.thegatesdev.actionable.builder.action;
 
 import io.github.thegatesdev.actionable.builder.ActionBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
-import io.github.thegatesdev.maple.read.ReadableOptions;
+import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.threshold.util.twin.Twin;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -18,7 +18,6 @@ import static io.github.thegatesdev.maple.read.Readable.number;
 public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<Twin<Entity, Entity>>, ActionBuilder<Twin<Entity, Entity>>> {
     public EntityEntityActions(String id) {
         super(id);
-        info().description("An action executed on an actor and a target entity.");
     }
 
     @Override
@@ -40,13 +39,13 @@ public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<T
 
             if (data.getBoolean("set")) launched.setVelocity(direction);
             else launched.setVelocity(launched.getVelocity().add(direction));
-        }, new ReadableOptions()
-            .add("amount", number(), 1)
-            .add("up", number(), 0)
-            .add("set", bool(), false)
+        }, new Options()
+            .addVal("amount", number(), 1)
+            .addVal("up", number(), 0)
+            .addVal("set", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new ReadableOptions().add("action", ENTITY_LOCATION_ACTION)));
+        register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new Options().add("action", ENTITY_LOCATION_ACTION)));
 
         register(new ActionBuilder<>("attack_target", (data, twin) -> {
             if (twin.actor() instanceof LivingEntity lv) lv.attack(twin.target());
@@ -55,7 +54,7 @@ public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<T
         register(new ActionBuilder<>("damage_target", (data, twin) -> {
             if (twin.target() instanceof LivingEntity livingTarget)
                 livingTarget.damage(data.getDouble("amount"), twin.actor());
-        }, new ReadableOptions().add("amount", number())));
+        }, new Options().add("amount", number())));
 
         register(new ActionBuilder<>("mount_target", (data, twin) -> twin.target().addPassenger(twin.actor())));
     }
