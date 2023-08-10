@@ -60,7 +60,7 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
         }, new Options()
             .add("action", ENTITY_ACTION)
             .optional("condition", ENTITY_CONDITION)
-            .addVal("living", bool(), false)
+            .add("living", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new Options()

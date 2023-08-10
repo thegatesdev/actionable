@@ -34,7 +34,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             location.add(dir);
         }, new Options()
             .add("direction", VECTOR)
-            .addVal("relative", bool(), false)
+            .add("relative", bool(), false)
         ));
 
         register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new Options()
@@ -50,8 +50,8 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             world.playSound(location, sound, SoundCategory.AMBIENT, volume, pitch);
         }, new Options()
             .add("sound", enumeration(Sound.class))
-            .addVal("pitch", number(), 0)
-            .addVal("volume", number(), 1f)
+            .add("pitch", number(), 0)
+            .add("volume", number(), 1f)
         ));
 
         register(new ActionBuilder<>("fill", (data, location) -> {
@@ -94,10 +94,10 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
         }, new Options()
             .add("particle", enumeration(Particle.class))
             .optional("material", enumeration(Material.class))
-            .addVal("amount", number(), 1)
-            .addVal("speed", number(), 1d)
-            .addVal("offset", VECTOR, new Vector())
-            .addVal("vector", VECTOR, new Vector())
+            .add("amount", number(), 1)
+            .add("speed", number(), 1d)
+            .add("offset", VECTOR, new Vector())
+            .add("vector", VECTOR, new Vector())
         ));
 
         register(new ActionBuilder<>("summon", (data, location) -> {
@@ -120,8 +120,8 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
                 world.spigot().strikeLightning(location, data.getBoolean("silent"));
             else world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
         }, new Options()
-            .addVal("damage", bool(), true)
-            .addVal("silent", bool(), false)
+            .add("damage", bool(), true)
+            .add("silent", bool(), false)
         ));
     }
 }

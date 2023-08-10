@@ -33,7 +33,7 @@ public class ReactorBuilder<E extends Event> implements DataBuilder<ClassListene
         this.key = key;
         this.eventClass = eventClass;
         this.options = options;
-        options.addVal("cancel", Readable.bool(), false);
+        options.add("cancel", Readable.bool(), false);
     }
 
     // -- BUILD
