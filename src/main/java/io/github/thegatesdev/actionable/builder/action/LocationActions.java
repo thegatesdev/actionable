@@ -1,11 +1,11 @@
 package io.github.thegatesdev.actionable.builder.action;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import io.github.thegatesdev.actionable.builder.ActionBuilder;
 import io.github.thegatesdev.actionable.registry.BuilderRegistry;
 import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.threshold.world.WorldModification;
 import org.bukkit.*;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
@@ -77,27 +77,24 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
         }, new Options().add("block", enumeration(Material.class))));
 
         register(new ActionBuilder<>("particle", (data, location) -> {
-            location.checkFinite();
-            final World world = location.getWorld();
-            if (world == null) return;
-            final Particle particle = data.getObject("particle", Particle.class);
-            Object particleData = null;
-            if (particle.getDataType() != Void.class) {
-                if (particle.getDataType() == BlockData.class) {
-                    Material material = data.getUnsafe("material");
-                    if (material == null) return;
-                    particleData = material.createBlockData(); // TODO Create block data beforehand
-                }
-            } else particleData = data.getDouble("speed");
-            final Vector vector = data.getObject("vector", Vector.class);
-            world.spawnParticle(particle, location.add(data.getObject("offset", Vector.class)), data.getInt("amount"), vector.getX(), vector.getY(), vector.getZ(), particleData);
+            var particle = data.getObject("particle", Particle.class);
+            var builder = new ParticleBuilder(particle);
+            builder.location(location);
+            builder.count(data.getInt("amount"));
+            Vector offset = data.getUnsafe("offset");
+            builder.offset(offset.getX(), offset.getY(), offset.getZ());
+            if (particle.getDataType().isAssignableFrom(Material.class))
+                builder.data(data.getUnsafe("material", null));
+            builder.extra(data.getDouble("extra"));
+            Vector color = data.getUnsafe("color");
+            builder.color(color.getBlockX(), color.getBlockY(), color.getBlockZ());
         }, new Options()
             .add("particle", enumeration(Particle.class))
             .optional("material", enumeration(Material.class))
-            .add("amount", number(), 1)
-            .add("speed", number(), 1d)
+            .add("amount", integer(), 1)
+            .add("extra", number(), 1d)
             .add("offset", VECTOR, new Vector())
-            .add("vector", VECTOR, new Vector())
+            .add("color", VECTOR, new Vector())
         ));
 
         register(new ActionBuilder<>("summon", (data, location) -> {
