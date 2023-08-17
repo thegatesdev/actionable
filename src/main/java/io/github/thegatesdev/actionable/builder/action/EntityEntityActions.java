@@ -11,6 +11,7 @@ import org.bukkit.util.Vector;
 
 import java.util.function.Consumer;
 
+import static io.github.thegatesdev.actionable.Actionable.VECTOR;
 import static io.github.thegatesdev.actionable.registry.Registries.*;
 import static io.github.thegatesdev.maple.read.Readable.bool;
 import static io.github.thegatesdev.maple.read.Readable.number;
@@ -30,18 +31,15 @@ public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<T
         register(ActionBuilder.loopWhileFactory(ENTITY_ENTITY_ACTION, ENTITY_ENTITY_CONDITION));
 
         register(new ActionBuilder<>("launch_target", (data, twin) -> {
-            final double amount = data.getDouble("amount");
-            final double y = data.getDouble("up");
-
-            final Location actorLoc = twin.actor().getLocation();
             final Entity launched = twin.target();
-            final Vector direction = launched.getLocation().subtract(actorLoc).multiply(amount).add(0, y, 0).toVector();
+            final Vector direction = launched.getLocation().toVector().subtract(twin.actor().getLocation().toVector())
+                .normalize().multiply(data.getUnsafe("multiplier")).add(data.getUnsafe("addition"));
 
             if (data.getBoolean("set")) launched.setVelocity(direction);
             else launched.setVelocity(launched.getVelocity().add(direction));
         }, new Options()
-            .add("amount", number(), 1)
-            .add("up", number(), 0)
+            .add("multiplier", VECTOR, new Vector(1, 1, 1))
+            .add("addition", VECTOR, new Vector())
             .add("set", bool(), false)
         ));
 
