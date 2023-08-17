@@ -135,11 +135,14 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
                                          Consumer<Data> action) {
         public boolean test(E event) {
             if (condition == null) return true;
-            return condition.test(dataGetter.apply(event));
+            var data = dataGetter.apply(event);
+            return data == null || condition.test(data);
         }
 
         public void run(E event) {
-            if (action != null) action.accept(dataGetter.apply(event));
+            if (action == null) return;
+            var data = dataGetter.apply(event);
+            if (data != null) action.accept(data);
         }
 
     }
