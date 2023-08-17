@@ -102,14 +102,14 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
             this.cancel = data.getBoolean("cancel");
         }
 
-        public boolean test(E event) {
+        private boolean test(E event) {
             for (int i = 0; i < staticConditions.size(); i++)
                 if (!staticConditions.get(i).test(data, event)) return false;
             for (int i = 0; i < entries.length; i++) if (!entries[i].test(event)) return false;
             return true;
         }
 
-        public void run(E event) {
+        private void run(E event) {
             for (int i = 0; i < staticActions.size(); i++) staticActions.get(i).accept(data, event);
             for (int i = 0; i < entries.length; i++) entries[i].run(event);
         }

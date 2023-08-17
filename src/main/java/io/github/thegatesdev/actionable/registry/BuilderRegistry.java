@@ -39,11 +39,15 @@ public abstract class BuilderRegistry<Data, B extends DataBuilder<? extends Data
 
     @Override
     public DataValue<Data> read(DataElement element) {
+        return DataValue.of(build(element));
+    }
+
+    public Data build(DataElement element) {
         var data = element.requireOf(DataMap.class);
         var type = data.getString("type");
         var factory = get(type);
         if (factory == null) throw new ElementException(data, "Specified %s %s does not exist".formatted(key, type));
-        return DataValue.of(factory.build(data));
+        return factory.build(data);
     }
 
 
