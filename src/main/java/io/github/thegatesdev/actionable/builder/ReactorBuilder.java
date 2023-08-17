@@ -38,7 +38,8 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
     // -- BUILD
 
     @Override
-    public ClassListener<E> build(DataMap data) {
+    public ClassListener<E> build(DataMap input) {
+        var data = Options.read(options, input);
         return new Reactor(data, buildEntries(data));
     }
 
