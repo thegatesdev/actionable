@@ -44,11 +44,9 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
 
     @SuppressWarnings("unchecked")
     private ReactorEntry<E, ?>[] buildEntries(DataMap data) {
-        ReactorEntry<E, ?>[] entries = new ReactorEntry[dataEntries.size()];
-
-        for (int i = 0; i < dataEntries.size(); i++)
-            entries[i] = dataEntries.get(i).read(data);
-        return entries;
+        var entries = new ArrayList<ReactorEntry<E, ?>>();
+        for (var dataEntry : dataEntries) entries.add(dataEntry.read(data));
+        return entries.toArray(ReactorEntry[]::new);
     }
 
     // -- MUTATE
@@ -132,11 +130,12 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
                                          Predicate<Data> condition,
                                          Consumer<Data> action) {
         public boolean test(E event) {
+            if (condition == null) return true;
             return condition.test(dataGetter.apply(event));
         }
 
         public void run(E event) {
-            action.accept(dataGetter.apply(event));
+            if (action != null) action.accept(dataGetter.apply(event));
         }
 
     }
@@ -144,7 +143,10 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
     private record DataEntry<E, Data>(String conditionName, String actionName,
                                       Function<E, Data> dataGetter) {
         private ReactorEntry<E, Data> read(DataMap data) {
-            return new ReactorEntry<>(dataGetter, data.getUnsafe(conditionName), data.getUnsafe(actionName));
+            Predicate<Data> condition = data.getUnsafe(conditionName, null);
+            Consumer<Data> action = data.getUnsafe(actionName, null);
+            if (condition == null && action == null) return null;
+            return new ReactorEntry<>(dataGetter, condition, action);
         }
     }
 }
