@@ -44,6 +44,10 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBu
             .add("click_type", Readable.enumeration(ClickType.class), ClickType.ANY)
             .add("click_location", Readable.enumeration(ClickLocation.class), ClickLocation.ANY))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
+            .reactor("location", event -> {
+                var block = event.getClickedBlock();
+                return block == null ? null : block.getLocation();
+            }, LOCATION_CONDITION, LOCATION_ACTION)
             .reactor("spot", PlayerInteractEvent::getInteractionPoint, LOCATION_CONDITION, LOCATION_ACTION)
             .condition((data, event) -> {
                 if (!data.<ClickType>getUnsafe("click_type").compare(event.getAction())) return false;
