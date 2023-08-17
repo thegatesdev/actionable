@@ -5,6 +5,7 @@ import io.github.thegatesdev.actionable.registry.BuilderRegistry;
 import io.github.thegatesdev.maple.read.Options;
 import io.github.thegatesdev.maple.read.Readable;
 import io.github.thegatesdev.threshold.event.listening.ClassListener;
+import io.github.thegatesdev.threshold.util.twin.Twin;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
 
@@ -56,7 +57,7 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBu
         );
         register(new ReactorBuilder<>("entity_click", PlayerInteractEntityEvent.class)
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
-            .reactor("clicked", PlayerInteractEntityEvent::getRightClicked, ENTITY_CONDITION, ENTITY_ACTION)
+            .reactor("clicked", e -> Twin.of(e.getPlayer(), e.getRightClicked()), ENTITY_ENTITY_CONDITION, ENTITY_ENTITY_ACTION)
         );
         register(new ReactorBuilder<>("item_drop", PlayerDropItemEvent.class)
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
