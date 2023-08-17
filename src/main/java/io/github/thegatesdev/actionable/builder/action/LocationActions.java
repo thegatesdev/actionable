@@ -90,10 +90,14 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
                 Vector color = data.getUnsafe("color");
                 builder.color(color.getBlockX(), color.getBlockY(), color.getBlockZ());
             }
+            builder.receivers(data.getInt("radius"), data.getBoolean("round_radius"));
+            builder.spawn();
         }, new Options()
             .add("particle", enumeration(Particle.class))
             .optional("material", enumeration(Material.class))
             .add("amount", integer(), 1)
+            .add("radius", integer(), 20)
+            .add("round_radius", bool(), false)
             .add("extra", number(), 1d)
             .add("offset", VECTOR, new Vector())
             .add("color", VECTOR, new Vector())
