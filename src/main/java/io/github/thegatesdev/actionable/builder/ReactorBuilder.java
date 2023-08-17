@@ -46,7 +46,10 @@ public class ReactorBuilder<E> implements DataBuilder<ClassListener<E>>, Keyed {
     @SuppressWarnings("unchecked")
     private ReactorEntry<E, ?>[] buildEntries(DataMap data) {
         var entries = new ArrayList<ReactorEntry<E, ?>>();
-        for (var dataEntry : dataEntries) entries.add(dataEntry.read(data));
+        for (var dataEntry : dataEntries) {
+            var entry = dataEntry.read(data);
+            if (entry != null) entries.add(entry);
+        }
         return entries.toArray(ReactorEntry[]::new);
     }
 
