@@ -42,7 +42,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
         register(ActionBuilder.loopFactory(ENTITY_ACTION));
         register(ActionBuilder.loopWhileFactory(ENTITY_ACTION, ENTITY_CONDITION));
 
-        register(new ActionBuilder<>("run_here", (data, entity) -> {
+        register(new ActionBuilder<>("run_here_with", (data, entity) -> {
             Vector offset = data.getUnsafe("offset");
             var loc = entity.getLocation();
             if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
@@ -50,6 +50,17 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
         }, new Options()
             .add("offset", VECTOR, new Vector(0, 0, 0))
             .add("action", ENTITY_LOCATION_ACTION)
+            .add("relative", bool(), false)
+        ));
+
+        register(new ActionBuilder<>("run_here", (data, entity) -> {
+            Vector offset = data.getUnsafe("offset");
+            var loc = entity.getLocation();
+            if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
+            data.<Consumer<Location>>getUnsafe("action").accept(loc.add(offset));
+        }, new Options()
+            .add("offset", VECTOR, new Vector(0, 0, 0))
+            .add("action", LOCATION_ACTION)
             .add("relative", bool(), false)
         ));
 
