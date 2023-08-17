@@ -86,8 +86,10 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             if (particle.getDataType().isAssignableFrom(Material.class))
                 builder.data(data.getUnsafe("material", null));
             builder.extra(data.getDouble("extra"));
-            Vector color = data.getUnsafe("color");
-            builder.color(color.getBlockX(), color.getBlockY(), color.getBlockZ());
+            if (particle == Particle.REDSTONE) {
+                Vector color = data.getUnsafe("color");
+                builder.color(color.getBlockX(), color.getBlockY(), color.getBlockZ());
+            }
         }, new Options()
             .add("particle", enumeration(Particle.class))
             .optional("material", enumeration(Material.class))
