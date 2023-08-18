@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
 
     api("io.github.thegatesdev:maple:")
     compileOnly("io.github.thegatesdev:threshold:")
