@@ -45,7 +45,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final World world = location.getWorld();
             if (world == null) return;
             final Sound sound = data.getUnsafe("sound");
-            int pitch = data.getInt("pitch");
+            float pitch = data.getFloat("pitch");
             float volume = data.getFloat("volume");
             world.playSound(location, sound, SoundCategory.AMBIENT, volume, pitch);
         }, new Options()

@@ -33,13 +33,13 @@ public final class EntityConditions extends BuilderRegistry.Static<Predicate<Ent
 
         register(new ConditionBuilder<>("in_water", (data, entity) -> entity.isInWater()));
 
-        register(new ConditionBuilder<>("under_water", (data, entity) -> entity.isInWater()));
+        register(new ConditionBuilder<>("under_water", (data, entity) -> entity.isUnderWater()));
 
-        register(new ConditionBuilder<>("in_rain", (data, entity) -> entity.isInWater()));
+        register(new ConditionBuilder<>("in_rain", (data, entity) -> entity.isInRain()));
 
-        register(new ConditionBuilder<>("in_lava", (data, entity) -> entity.isInWater()));
+        register(new ConditionBuilder<>("in_lava", (data, entity) -> entity.isInLava()));
 
-        register(new ConditionBuilder<>("in_powdered_snow", (data, entity) -> entity.isInWater()));
+        register(new ConditionBuilder<>("in_powdered_snow", (data, entity) -> entity.isInPowderedSnow()));
 
         register(new ConditionBuilder<>("has_passenger", (data, entity) -> !entity.isEmpty()));
 

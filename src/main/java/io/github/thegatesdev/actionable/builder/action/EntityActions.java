@@ -81,14 +81,14 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
         register(new ActionBuilder<>("swing_hand", (data, entity) -> {
             if (entity instanceof LivingEntity livingEntity) {
                 EquipmentSlot slot = data.getUnsafe("hand");
-                if (slot == EquipmentSlot.HAND) livingEntity.swingMainHand();
-                else if (slot == EquipmentSlot.OFF_HAND) livingEntity.swingOffHand();
+                if (slot == EquipmentSlot.OFF_HAND) livingEntity.swingOffHand();
+                else livingEntity.swingMainHand();
             }
         }, new Options()
             .add("hand", enumeration(EquipmentSlot.class))
         ));
 
-        register(new ActionBuilder<>("drop_slot", (data, entity) -> {
+        register(new ActionBuilder<>("drop_item", (data, entity) -> {
             if (entity instanceof HumanEntity humanEntity) {
                 final int slot = data.getInt("slot");
                 final ItemStack stack = humanEntity.getInventory().getItem(slot);
@@ -116,23 +116,22 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
 
         register(new ActionBuilder<>("run_in_area", (data, entity) -> {
             final Location location = entity.getLocation();
+            final Vector range = data.getUnsafe("range");
+            final Predicate<Twin<Entity, Entity>> condition = data.getUnsafe("condition");
+            final boolean includeSelf = data.getBoolean("include_self");
+
             final MutableTwin<Entity, Entity> twinCache = new MutableTwin<>(entity, null);
-            final List<Entity> nearbyEntities;
-            {
-                final Vector range = data.getUnsafe("range");
-                final Predicate<Twin<Entity, Entity>> entityPredicate = data.getUnsafe("_pred");
-                nearbyEntities = new ArrayList<>(entity.getWorld().getNearbyEntities(location, range.getX(), range.getY(), range.getZ(), entity1 -> entityPredicate.test(twinCache.setTarget(entity1))));
-            }
+            final List<Entity> nearbyEntities = new ArrayList<>(entity.getWorld().getNearbyEntities(location, range.getX(), range.getY(), range.getZ(), e ->
+                (includeSelf || e.getEntityId() != entity.getEntityId()) && condition.test(twinCache.setTarget(e))
+            ));
             if (nearbyEntities.isEmpty()) return;
             nearbyEntities.sort(Comparator.comparingDouble(o -> location.distanceSquared(o.getLocation())));
 
-            final double maxEntities = data.getDouble("max_entities");
+            final int maxEntities = data.getInt("max_entities");
             final Consumer<Twin<Entity, Entity>> hitAction = data.getUnsafe("action");
-            int i = 0;
-            for (Entity nearbyEntity : nearbyEntities) {
-                hitAction.accept(twinCache.setTarget(nearbyEntity));
-                if (++i > maxEntities) return;
-            }
+
+            for (int i = 0; i < nearbyEntities.size() && i < maxEntities; i++)
+                hitAction.accept(twinCache.setTarget(nearbyEntities.get(i)));
         }, new Options()
             .add("range", VECTOR, new Vector(10, 10, 10))
             .add("include_self", bool(), false)
@@ -203,7 +202,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 if (relativeHitAction != null) {
                     final BlockFace hitFace = rayResult.getHitBlockFace();
                     if (hitFace != null)
-                        relativeHitAction.accept(Twin.of(entity, Objects.requireNonNull(rayResult.getHitBlock()).getLocation().add(hitFace.getDirection())));
+                        relativeHitAction.accept(Twin.of(entity, Objects.requireNonNull(rayResult.getHitBlock()).getLocation().add(hitFace.getDirection().multiply(data.getFloat("relative_multiplier")))));
                 }
             }
 
@@ -225,6 +224,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             .optional("ray_action", ENTITY_LOCATION_ACTION)
             .optional("hit_action", ENTITY_LOCATION_ACTION)
             .optional("relative_hit_action", ENTITY_LOCATION_ACTION)
+            .add("relative_multiplier", number(), 1)
             .optional("hit_entity_action", ENTITY_ENTITY_ACTION)
             .optional("hit_entity_condition", ENTITY_ENTITY_CONDITION)
             .add("cast_type", enumeration(RaycastType.class), RaycastType.BOTH)

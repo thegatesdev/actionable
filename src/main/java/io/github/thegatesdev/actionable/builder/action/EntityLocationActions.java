@@ -27,7 +27,9 @@ public final class EntityLocationActions extends BuilderRegistry.Static<Consumer
         register(ActionBuilder.loopFactory(ENTITY_LOCATION_ACTION));
         register(ActionBuilder.loopWhileFactory(ENTITY_LOCATION_ACTION, ENTITY_LOCATION_CONDITION));
 
-        register(new ActionBuilder<>("teleport_to", (data, twin) -> twin.actor().teleport(twin.target().setDirection(twin.actor().getLocation().getDirection()).add(data.getObject("offset", Vector.class))), new Options().add("offset", VECTOR, new Vector(0, 0, 0))));
+        register(new ActionBuilder<>("teleport_to", (data, twin) ->
+            twin.actor().teleport(twin.target().add(data.getObject("offset", Vector.class))), new Options()
+            .add("offset", VECTOR, new Vector(0, 0, 0))));
 
         register(new ActionBuilder<>("look_at", (data, twin) -> {
             final Location location = twin.target().clone();
@@ -38,10 +40,6 @@ public final class EntityLocationActions extends BuilderRegistry.Static<Consumer
 
         register(new ActionBuilder<>("run_in_world", (data, twin) -> data.<Consumer<World>>getUnsafe("action").accept(twin.target().getWorld()), new Options()
             .add("action", WORLD_ACTION)
-        ));
-
-        register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Location>>getUnsafe("action").accept(twin.target()), new Options()
-            .add("action", LOCATION_ACTION)
         ));
     }
 }
