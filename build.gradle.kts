@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.thegatesdev"
-version = "2.0"
+version = "0.3.0"
 description = "Data driven actions, conditions and event reacting."
 java.sourceCompatibility = JavaVersion.VERSION_17
 
