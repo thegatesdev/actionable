@@ -30,7 +30,7 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
         register(ActionBuilder.loopFactory(WORLD_ACTION));
         register(ActionBuilder.loopWhileFactory(WORLD_ACTION, WORLD_CONDITION));
 
-        register(new ActionBuilder<>("broadcast_message", (data, world) -> world.sendMessage(data.getUnsafe("message")), new Options().add("message", COLORED_STRING)));
+        register(new ActionBuilder<>("broadcast_message", (data, world) -> world.sendMessage(data.getUnsafe("message")), new Options.Builder().add("message", COLORED_STRING)));
 
         register(new ActionBuilder<>("each_player", (data, world) -> {
             final Consumer<Entity> action = data.getUnsafe("action");
@@ -42,7 +42,7 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
                 for (Player player : world.getPlayers()) {
                     if (condition.test(player)) action.accept(player);
                 }
-        }, new Options()
+        }, new Options.Builder()
             .add("action", ENTITY_ACTION)
             .optional("condition", ENTITY_CONDITION)
         ));
@@ -57,13 +57,13 @@ public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, 
                 for (Entity entity : toLoop) {
                     if (condition.test(entity)) action.accept(entity);
                 }
-        }, new Options()
+        }, new Options.Builder()
             .add("action", ENTITY_ACTION)
             .optional("condition", ENTITY_CONDITION)
             .add("living", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new Options()
+        register(new ActionBuilder<>("run_at", (data, world) -> data.<Consumer<Location>>getUnsafe("action").accept(data.<Vector>getUnsafe("location").toLocation(world)), new Options.Builder()
             .add("location", VECTOR)
             .add("action", LOCATION_ACTION)
         ));

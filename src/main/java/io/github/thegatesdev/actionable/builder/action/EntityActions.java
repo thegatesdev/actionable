@@ -47,7 +47,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             var loc = entity.getLocation();
             if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
             data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(entity, loc.add(offset)));
-        }, new Options()
+        }, new Options.Builder()
             .add("offset", VECTOR, new Vector(0, 0, 0))
             .add("action", ENTITY_LOCATION_ACTION)
             .add("relative", bool(), false)
@@ -58,23 +58,23 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             var loc = entity.getLocation();
             if (data.getBoolean("relative")) offset = loc.getDirection().multiply(offset);
             data.<Consumer<Location>>getUnsafe("action").accept(loc.add(offset));
-        }, new Options()
+        }, new Options.Builder()
             .add("offset", VECTOR, new Vector(0, 0, 0))
             .add("action", LOCATION_ACTION)
             .add("relative", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new Options()
+        register(new ActionBuilder<>("run_in_world", (data, entity) -> data.<Consumer<World>>getUnsafe("action").accept(entity.getLocation().getWorld()), new Options.Builder()
             .add("action", WORLD_ACTION)
         ));
 
-        register(new ActionBuilder<>("send_message", (data, entity) -> entity.sendMessage(data.<Component>getUnsafe("message")), new Options()
+        register(new ActionBuilder<>("send_message", (data, entity) -> entity.sendMessage(data.<Component>getUnsafe("message")), new Options.Builder()
             .add("message", COLORED_STRING)
         ));
 
         register(new ActionBuilder<>("run_command", (data, entity) -> {
             if (entity instanceof Player player) player.performCommand(data.getString("command"));
-        }, new Options()
+        }, new Options.Builder()
             .add("command", string())
         ));
 
@@ -84,7 +84,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 if (slot == EquipmentSlot.OFF_HAND) livingEntity.swingOffHand();
                 else livingEntity.swingMainHand();
             }
-        }, new Options()
+        }, new Options.Builder()
             .add("hand", enumeration(EquipmentSlot.class))
         ));
 
@@ -98,7 +98,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 final Item item = humanEntity.getWorld().dropItemNaturally(humanEntity.getLocation(), stack);
                 if (droppedItemAction != null) droppedItemAction.accept(Twin.of(entity, item));
             }
-        }, new Options()
+        }, new Options.Builder()
             .add("slot", integer())
             .optional("drop_action", ENTITY_ENTITY_ACTION)
         ));
@@ -108,7 +108,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             if (data.getBoolean("relative")) dir = entity.getLocation().getDirection().multiply(dir);
             if (data.getBoolean("set")) entity.setVelocity(dir);
             else entity.setVelocity(entity.getVelocity().add(dir));
-        }, new Options()
+        }, new Options.Builder()
             .add("direction", VECTOR)
             .add("set", bool(), true)
             .add("relative", bool(), false)
@@ -132,7 +132,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
 
             for (int i = 0; i < nearbyEntities.size() && i < maxEntities; i++)
                 hitAction.accept(twinCache.setTarget(nearbyEntities.get(i)));
-        }, new Options()
+        }, new Options.Builder()
             .add("range", VECTOR, new Vector(10, 10, 10))
             .add("include_self", bool(), false)
             .add("max_entities", integer(), 10)
@@ -144,7 +144,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             final Vector where = data.getUnsafe("where");
             if (data.getBoolean("relative")) entity.teleport(entity.getLocation().add(where));
             else entity.teleport(where.toLocation(entity.getWorld()));
-        }, new Options()
+        }, new Options.Builder()
             .add("where", VECTOR)
             .add("relative", bool(), false)
         ));
@@ -152,7 +152,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
         register(new ActionBuilder<>("set_fire", (data, entity) -> {
             final int fireTicks = data.getInt("ticks");
             if (data.getBoolean("force") || entity.getFireTicks() < fireTicks) entity.setFireTicks(fireTicks);
-        }, new Options()
+        }, new Options.Builder()
             .add("ticks", integer(), 1000)
             .add("force", bool(), false)
         ));
@@ -216,7 +216,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 for (Vector position : positions)
                     rayAction.accept(twin.setTarget(l.set(position.getX(), position.getY(), position.getZ())));
             }
-        }, new Options()
+        }, new Options.Builder()
             .add("max_distance", number(), 100)
             .add("step_distance", number(), 1)
             .add("ray_size", number(), 1)
@@ -233,7 +233,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
         register(new ActionBuilder<>("damage", (data, entity) -> {
             if (entity instanceof LivingEntity livingEntity)
                 livingEntity.damage(data.getDouble("amount"), entity.getUniqueId() == livingEntity.getUniqueId() ? null : entity);
-        }, new Options()
+        }, new Options.Builder()
             .add("amount", number(), 1)
         ));
 
@@ -245,7 +245,7 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 else
                     livingEntity.addPotionEffect(new PotionEffect(type, data.getInt("duration"), data.getInt("amplifier"), data.getBoolean("is_ambient"), data.getBoolean("show_particles"), data.getBoolean("show_icon")));
             }
-        }, new Options()
+        }, new Options.Builder()
             .add("effect", EFFECT_TYPE)
             .add("remove", bool(), false)
             .add("duration", integer(), 20)
@@ -262,12 +262,12 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
                 var action = data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action", null);
                 if (action != null) action.accept(Twin.of(entity, vehicle));
             }
-        }, new Options().optional("action", ENTITY_ENTITY_ACTION)));
+        }, new Options.Builder().optional("action", ENTITY_ENTITY_ACTION)));
 
         register(new ActionBuilder<>("run_on_vehicle", (data, entity) -> {
             final Entity vehicle = entity.getVehicle();
             if (vehicle != null)
                 data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action").accept(Twin.of(entity, vehicle));
-        }, new Options().add("action", ENTITY_ENTITY_ACTION)));
+        }, new Options.Builder().add("action", ENTITY_ENTITY_ACTION)));
     }
 }

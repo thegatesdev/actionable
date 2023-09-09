@@ -22,7 +22,7 @@ public final class EntityConditions extends BuilderRegistry.Static<Predicate<Ent
         register(ConditionBuilder.andFactory(ENTITY_CONDITION));
 
         register(new ConditionBuilder<>("is_of", (data, entity) -> entity.getType() == data.getObject("entity_type", EntityType.class),
-            new Options().add("entity_type", enumeration(EntityType.class))
+            new Options.Builder().add("entity_type", enumeration(EntityType.class))
         ));
 
         register(new ConditionBuilder<>("sneaking", (data, entity) -> entity.isSneaking()));

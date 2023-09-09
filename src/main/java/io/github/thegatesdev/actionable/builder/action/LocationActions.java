@@ -32,12 +32,12 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             Vector dir = data.getUnsafe("direction");
             if (data.getBoolean("relative")) dir = location.getDirection().multiply(dir);
             location.add(dir);
-        }, new Options()
+        }, new Options.Builder()
             .add("direction", VECTOR)
             .add("relative", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new Options()
+        register(new ActionBuilder<>("run_in_world", (data, location) -> data.<Consumer<World>>getUnsafe("action").accept(location.getWorld()), new Options.Builder()
             .add("action", WORLD_ACTION)
         ));
 
@@ -48,7 +48,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             float pitch = data.getFloat("pitch");
             float volume = data.getFloat("volume");
             world.playSound(location, sound, SoundCategory.AMBIENT, volume, pitch);
-        }, new Options()
+        }, new Options.Builder()
             .add("sound", enumeration(Sound.class))
             .add("pitch", number(), 0)
             .add("volume", number(), 1f)
@@ -64,7 +64,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final var mod = WorldModification.sync(world);
             mod.fill(from.getBlockX(), from.getBlockY(), from.getBlockZ(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), material);
             mod.update();
-        }, new Options()
+        }, new Options.Builder()
             .add("from", VECTOR)
             .add("to", VECTOR)
             .add("block", enumeration(Material.class))
@@ -74,7 +74,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final World world = location.getWorld();
             if (world == null) return;
             world.getBlockAt(location).setType(data.getUnsafe("block"));
-        }, new Options().add("block", enumeration(Material.class))));
+        }, new Options.Builder().add("block", enumeration(Material.class))));
 
         register(new ActionBuilder<>("particle", (data, location) -> {
             var particle = data.getObject("particle", Particle.class);
@@ -92,7 +92,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             }
             builder.receivers(data.getInt("radius"), data.getBoolean("round_radius"));
             builder.spawn();
-        }, new Options()
+        }, new Options.Builder()
             .add("particle", enumeration(Particle.class))
             .optional("material", enumeration(Material.class))
             .add("amount", integer(), 1)
@@ -111,7 +111,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             final Entity spawnedEntity = world.spawnEntity(location, entityType);
             final Consumer<Entity> mobAction = data.getUnsafe("action", null);
             if (mobAction != null) mobAction.accept(spawnedEntity);
-        }, new Options()
+        }, new Options.Builder()
             .add("entity_type", enumeration(EntityType.class))
             .optional("action", ENTITY_ACTION)
         ));
@@ -122,7 +122,7 @@ public final class LocationActions extends BuilderRegistry.Static<Consumer<Locat
             if (data.getBoolean("damage"))
                 world.spigot().strikeLightning(location, data.getBoolean("silent"));
             else world.spigot().strikeLightningEffect(location, data.getBoolean("silent"));
-        }, new Options()
+        }, new Options.Builder()
             .add("damage", bool(), true)
             .add("silent", bool(), false)
         ));

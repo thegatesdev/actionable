@@ -37,13 +37,13 @@ public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<T
 
             if (data.getBoolean("set")) launched.setVelocity(direction);
             else launched.setVelocity(launched.getVelocity().add(direction));
-        }, new Options()
+        }, new Options.Builder()
             .add("multiplier", VECTOR, new Vector(1, 1, 1))
             .add("addition", VECTOR, new Vector())
             .add("set", bool(), false)
         ));
 
-        register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new Options().add("action", ENTITY_LOCATION_ACTION)));
+        register(new ActionBuilder<>("run_at_target", (data, twin) -> data.<Consumer<Twin<Entity, Location>>>getUnsafe("action").accept(Twin.of(twin.actor(), twin.target().getLocation())), new Options.Builder().add("action", ENTITY_LOCATION_ACTION)));
 
         register(new ActionBuilder<>("attack_target", (data, twin) -> {
             if (twin.actor() instanceof LivingEntity lv) lv.attack(twin.target());
@@ -52,7 +52,7 @@ public final class EntityEntityActions extends BuilderRegistry.Static<Consumer<T
         register(new ActionBuilder<>("damage_target", (data, twin) -> {
             if (twin.target() instanceof LivingEntity livingTarget)
                 livingTarget.damage(data.getDouble("amount"), twin.actor());
-        }, new Options().add("amount", number())));
+        }, new Options.Builder().add("amount", number())));
 
         register(new ActionBuilder<>("mount_target", (data, twin) -> twin.target().addPassenger(twin.actor())));
     }

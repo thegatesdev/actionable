@@ -26,14 +26,19 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
         this.options = options;
     }
 
-    public ActionBuilder(String key, BiConsumer<DataMap, T> effect) {
-        this(key, effect, new Options());
+    public ActionBuilder(String key, BiConsumer<DataMap, T> effect, Options.Builder builder) {
+        this(key, effect, builder.build());
     }
+
+    public ActionBuilder(String key, BiConsumer<DataMap, T> effect) {
+        this(key, effect, Options.EMPTY);
+    }
+
 
     public static <T> ActionBuilder<T> moreFactory(DataTypeHolder<DataValue<Consumer<T>>> dataType) {
         return new ActionBuilder<>("more", (data, t) ->
             data.getList("actions").each(element -> element.asValue().<Consumer<T>>valueUnsafe().accept(t)),
-            new Options().add("actions", dataType.dataType().list()));
+            new Options.Builder().add("actions", dataType.dataType().list()));
     }
 
     public static <T> ActionBuilder<T> loopFactory(DataTypeHolder<DataValue<Consumer<T>>> loopedActionType) {
@@ -41,7 +46,7 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
             int times = data.getInt("times");
             Consumer<T> action = data.getUnsafe("action");
             for (int i = 0; i < times; i++) action.accept(t);
-        }, new Options().add("times", integer()).add("action", loopedActionType));
+        }, new Options.Builder().add("times", integer()).add("action", loopedActionType));
     }
 
     public static <T> ActionBuilder<T> loopWhileFactory(DataTypeHolder<DataValue<Consumer<T>>> loopedActionType, DataTypeHolder<DataValue<Predicate<T>>> loopConditionType) {
@@ -52,11 +57,11 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
                 if (!condition.test(t)) break;
                 action.accept(t);
             }
-        }, new Options().add("action", loopedActionType).add("condition", loopConditionType));
+        }, new Options.Builder().add("action", loopedActionType).add("condition", loopConditionType));
     }
 
     public static <A, T> ActionBuilder<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Consumer<Twin<T, A>>>> dataType) {
-        return new ActionBuilder<>("flip_actor", (data, o) -> data.<Consumer<Twin<T, A>>>getUnsafe("action").accept(o.flipped()), new Options().add("action", dataType));
+        return new ActionBuilder<>("flip_actor", (data, o) -> data.<Consumer<Twin<T, A>>>getUnsafe("action").accept(o.flipped()), new Options.Builder().add("action", dataType));
     }
 
     public static <A, T> ActionBuilder<Twin<A, T>> splitFactory(DataTypeHolder<DataValue<Consumer<A>>> actorAction, DataTypeHolder<DataValue<Consumer<T>>> targetAction) {
@@ -65,7 +70,7 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
             Consumer<T> targetA = data.getUnsafe("target_action", null);
             if (actorA != null) actorA.accept(twin.actor());
             if (targetA != null) targetA.accept(twin.target());
-        }, new Options()
+        }, new Options.Builder()
             .optional("actor_action", actorAction)
             .optional("target_action", targetAction)
         );
@@ -78,7 +83,7 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
             Consumer<T> ifAction = data.getUnsafe("if_action");
             if (condition.test(t)) ifAction.accept(t);
             else data.ifValue("else_action", value -> value.<Consumer<T>>valueUnsafe().accept(t));
-        }, new Options()
+        }, new Options.Builder()
             .add("condition", conditionDataType)
             .add("if_action", actionDataType)
             .optional("else_action", actionDataType)
@@ -86,7 +91,7 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
     }
 
     public Consumer<T> build(DataMap data) {
-        return new Action(Options.read(options, data));
+        return new Action(options.read(data));
     }
 
     @Nonnull

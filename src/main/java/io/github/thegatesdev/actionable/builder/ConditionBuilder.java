@@ -23,12 +23,16 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
         this.options = options;
     }
 
+    public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate, Options.Builder builder) {
+        this(key, predicate, builder.build());
+    }
+
     public ConditionBuilder(String key, BiPredicate<DataMap, R> predicate) {
-        this(key, predicate, new Options());
+        this(key, predicate, Options.EMPTY);
     }
 
     public static <A, T> ConditionBuilder<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Predicate<Twin<T, A>>>> dataType) {
-        return new ConditionBuilder<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new Options().add("condition", dataType));
+        return new ConditionBuilder<>("flip", (data, o) -> data.<Predicate<Twin<T, A>>>getUnsafe("condition").test(o.flipped()), new Options.Builder().add("condition", dataType));
     }
 
     public static <A, T> ConditionBuilder<Twin<A, T>> splitAndFactory(DataTypeHolder<DataValue<Predicate<A>>> actorCondition, DataTypeHolder<DataValue<Predicate<T>>> targetCondition) {
@@ -37,7 +41,7 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
             if (actorC != null && !actorC.test(twin.actor())) return false;
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
             return targetC != null && targetC.test(twin.target());
-        }, new Options()
+        }, new Options.Builder()
             .optional("actor_condition", actorCondition)
             .optional("target_condition", targetCondition)
         );
@@ -49,7 +53,7 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
             if (actorC != null && actorC.test(twin.actor())) return true;
             Predicate<T> targetC = data.getUnsafe("target_condition", null);
             return targetC != null && targetC.test(twin.target());
-        }, new Options()
+        }, new Options.Builder()
             .optional("actor_condition", actorCondition)
             .optional("target_condition", targetCondition)
         );
@@ -62,7 +66,7 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
                 if (!list.<Predicate<T>>getUnsafe(i).test(t)) return false;
             }
             return true;
-        }, new Options().add("conditions", dataType.dataType().list()));
+        }, new Options.Builder().add("conditions", dataType.dataType().list()));
     }
 
     public static <T> ConditionBuilder<T> orFactory(DataTypeHolder<DataValue<Predicate<T>>> dataType) {
@@ -72,12 +76,12 @@ public class ConditionBuilder<R> implements DataBuilder<Predicate<R>>, Keyed {
                 if (list.<Predicate<T>>getUnsafe(i).test(t)) return true;
             }
             return false;
-        }, new Options().add("conditions", dataType.dataType().list()));
+        }, new Options.Builder().add("conditions", dataType.dataType().list()));
     }
 
     @Override
     public Predicate<R> build(DataMap data) {
-        return new Condition<>(this.predicate, Options.read(options, data), data.getBoolean("reverse", false));
+        return new Condition<>(this.predicate, options.read(data), data.getBoolean("reverse", false));
     }
 
     @Nonnull

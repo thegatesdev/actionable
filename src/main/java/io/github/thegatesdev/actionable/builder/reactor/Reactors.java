@@ -41,7 +41,7 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBu
         register(simplePlayer("item_break", PlayerItemBreakEvent.class));
         register(simplePlayer("item_consume", PlayerItemConsumeEvent.class));
 
-        register(new ReactorBuilder<>("click", PlayerInteractEvent.class, new Options()
+        register(new ReactorBuilder<>("click", PlayerInteractEvent.class, new Options.Builder()
             .add("click_type", Readable.enumeration(ClickType.class), ClickType.ANY)
             .add("click_location", Readable.enumeration(ClickLocation.class), ClickLocation.ANY))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
@@ -63,7 +63,7 @@ public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBu
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)
             .reactor("drop", PlayerDropItemEvent::getItemDrop, ENTITY_CONDITION, ENTITY_ACTION)
         );
-        register(new ReactorBuilder<>("item_grab_attempt", PlayerAttemptPickupItemEvent.class, new Options()
+        register(new ReactorBuilder<>("item_grab_attempt", PlayerAttemptPickupItemEvent.class, new Options.Builder()
             .add("fly_at_player", Readable.bool(), true))
             .action((data, event) -> event.setFlyAtPlayer(data.getBoolean("fly_at_player")))
             .reactor("player", PlayerEvent::getPlayer, ENTITY_CONDITION, ENTITY_ACTION)

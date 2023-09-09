@@ -24,7 +24,7 @@ public final class LocationConditions extends BuilderRegistry.Static<Predicate<L
         register(new ConditionBuilder<>("is_air", (data, location) -> location.getBlock().isEmpty()));
         register(new ConditionBuilder<>("is_full", (data, location) -> location.getBlock().getType().isOccluding()));
         register(new ConditionBuilder<>("is_of", (data, location) -> location.getBlock().getType() == data.getUnsafe("material"),
-            new Options().add("material", enumeration(Material.class))
+            new Options.Builder().add("material", enumeration(Material.class))
         ));
     }
 }
