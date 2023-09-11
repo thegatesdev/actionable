@@ -157,6 +157,14 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             .add("force", bool(), false)
         ));
 
+        register(new ActionBuilder<>("set_freezing", (data, entity) -> {
+            final int freezeTicks = data.getInt("ticks");
+            if (data.getBoolean("force") || entity.getFreezeTicks() < freezeTicks) entity.setFreezeTicks(freezeTicks);
+        }, new Options.Builder()
+            .add("ticks", integer(), 1000)
+            .add("force", bool(), false)
+        ));
+
         enum RaycastType {
             ENTITY, BLOCK, BOTH, COSMETIC
         }
