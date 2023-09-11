@@ -272,5 +272,19 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             if (vehicle != null)
                 data.<Consumer<Twin<Entity, Entity>>>getUnsafe("action").accept(Twin.of(entity, vehicle));
         }, new Options.Builder().add("action", ENTITY_ENTITY_ACTION)));
+
+        register(new ActionBuilder<>("rotate", (data, entity) -> {
+            float pitch = data.getFloat("pitch");
+            float yaw = data.getFloat("yaw");
+            if (data.getBoolean("relative")) {
+                pitch += entity.getPitch();
+                yaw += entity.getYaw();
+            }
+            entity.setRotation(pitch, yaw);
+        }, new Options.Builder()
+            .add("pitch", number())
+            .add("yaw", number())
+            .add("relative", bool(), false)
+        ));
     }
 }
