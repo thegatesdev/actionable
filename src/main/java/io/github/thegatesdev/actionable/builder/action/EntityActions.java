@@ -165,6 +165,8 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             .add("force", bool(), false)
         ));
 
+        register(new ActionBuilder<>("set_fall_distance", (data, entity) -> entity.setFallDistance(data.getFloat("distance")), new Options.Builder().add("distance", number())));
+
         enum RaycastType {
             ENTITY, BLOCK, BOTH, COSMETIC
         }
