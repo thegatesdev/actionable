@@ -12,7 +12,7 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 import static io.github.thegatesdev.maple.read.Readable.bool;
 import static io.github.thegatesdev.maple.read.Readable.number;
 

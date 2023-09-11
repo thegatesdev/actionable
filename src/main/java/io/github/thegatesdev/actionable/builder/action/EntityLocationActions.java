@@ -12,7 +12,7 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 
 public final class EntityLocationActions extends BuilderRegistry.Static<Consumer<Twin<Entity, Location>>, ActionBuilder<Twin<Entity, Location>>> {
     public EntityLocationActions(String id) {

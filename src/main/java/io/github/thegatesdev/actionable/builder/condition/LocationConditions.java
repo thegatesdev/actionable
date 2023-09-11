@@ -8,7 +8,7 @@ import org.bukkit.Material;
 
 import java.util.function.Predicate;
 
-import static io.github.thegatesdev.actionable.registry.Registries.LOCATION_CONDITION;
+import static io.github.thegatesdev.actionable.registry.Builders.LOCATION_CONDITION;
 import static io.github.thegatesdev.maple.read.Readable.enumeration;
 
 public final class LocationConditions extends BuilderRegistry.Static<Predicate<Location>, ConditionBuilder<Location>> {

@@ -1,6 +1,6 @@
 package io.github.thegatesdev.actionable;
 
-import io.github.thegatesdev.actionable.registry.Registries;
+import io.github.thegatesdev.actionable.registry.Builders;
 import io.github.thegatesdev.maple.data.DataValue;
 import io.github.thegatesdev.maple.exception.ElementException;
 import io.github.thegatesdev.maple.read.Readable;
@@ -13,8 +13,8 @@ import org.bukkit.util.Vector;
 public class Actionable extends JavaPlugin {
     @Override
     public void onLoad() {
-        Registries.registerAll();
-        Registries.lock();
+        Builders.registerAll();
+        Builders.lock();
     }
 
     public static final Readable<DataValue<PotionEffectType>> EFFECT_TYPE = Readable.value("effect", value ->

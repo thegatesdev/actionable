@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Actionable.COLORED_STRING;
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 import static io.github.thegatesdev.maple.read.Readable.bool;
 
 public final class WorldActions extends BuilderRegistry.Static<Consumer<World>, ActionBuilder<World>> {

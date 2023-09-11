@@ -8,7 +8,7 @@ import org.bukkit.entity.Entity;
 
 import java.util.function.Predicate;
 
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 
 public final class EntityLocationConditions extends BuilderRegistry.Static<Predicate<Twin<Entity, Location>>, ConditionBuilder<Twin<Entity, Location>>> {
     public EntityLocationConditions(String id) {

@@ -13,7 +13,7 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 import static io.github.thegatesdev.maple.read.Readable.*;
 
 public final class LocationActions extends BuilderRegistry.Static<Consumer<Location>, ActionBuilder<Location>> {

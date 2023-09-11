@@ -9,8 +9,8 @@ import org.bukkit.World;
 import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Actionable.VECTOR;
-import static io.github.thegatesdev.actionable.registry.Registries.LOCATION_CONDITION;
-import static io.github.thegatesdev.actionable.registry.Registries.WORLD_CONDITION;
+import static io.github.thegatesdev.actionable.registry.Builders.LOCATION_CONDITION;
+import static io.github.thegatesdev.actionable.registry.Builders.WORLD_CONDITION;
 
 public final class WorldConditions extends BuilderRegistry.Static<Predicate<World>, ConditionBuilder<World>> {
     public WorldConditions(String id) {

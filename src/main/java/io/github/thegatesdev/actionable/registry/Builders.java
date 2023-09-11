@@ -6,7 +6,7 @@ import io.github.thegatesdev.actionable.builder.reactor.Reactors;
 
 import java.util.*;
 
-public class Registries {
+public class Builders {
     private static boolean locked = false;
 
     private static final Map<String, BuilderRegistry<?, ?>> BUILDERS = new HashMap<>();

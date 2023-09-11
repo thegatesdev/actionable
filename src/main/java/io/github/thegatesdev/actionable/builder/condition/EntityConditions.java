@@ -8,7 +8,7 @@ import org.bukkit.entity.EntityType;
 
 import java.util.function.Predicate;
 
-import static io.github.thegatesdev.actionable.registry.Registries.ENTITY_CONDITION;
+import static io.github.thegatesdev.actionable.registry.Builders.ENTITY_CONDITION;
 import static io.github.thegatesdev.maple.read.Readable.enumeration;
 
 public final class EntityConditions extends BuilderRegistry.Static<Predicate<Entity>, ConditionBuilder<Entity>> {

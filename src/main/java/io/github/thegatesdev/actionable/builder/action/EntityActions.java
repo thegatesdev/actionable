@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static io.github.thegatesdev.actionable.Actionable.*;
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 import static io.github.thegatesdev.maple.read.Readable.*;
 
 public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>, ActionBuilder<Entity>> {
@@ -184,9 +184,12 @@ public final class EntityActions extends BuilderRegistry.Static<Consumer<Entity>
             if (offset != null) location.add(offset);
             final World world = entity.getWorld();
             final RayTraceResult rayResult = switch (rayType) {
-                case ENTITY -> world.rayTraceEntities(location, location.getDirection(), maxDistance, data.getDouble("ray_size"), entityPredicate);
-                case BLOCK -> world.rayTraceBlocks(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false);
-                case BOTH -> world.rayTrace(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false, data.getDouble("ray_size"), entityPredicate);
+                case ENTITY ->
+                    world.rayTraceEntities(location, location.getDirection(), maxDistance, data.getDouble("ray_size"), entityPredicate);
+                case BLOCK ->
+                    world.rayTraceBlocks(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false);
+                case BOTH ->
+                    world.rayTrace(location, location.getDirection(), maxDistance, FluidCollisionMode.SOURCE_ONLY, false, data.getDouble("ray_size"), entityPredicate);
                 case COSMETIC -> null;
             };
 

@@ -7,8 +7,8 @@ import org.bukkit.entity.Entity;
 
 import java.util.function.Predicate;
 
-import static io.github.thegatesdev.actionable.registry.Registries.ENTITY_CONDITION;
-import static io.github.thegatesdev.actionable.registry.Registries.ENTITY_ENTITY_CONDITION;
+import static io.github.thegatesdev.actionable.registry.Builders.ENTITY_CONDITION;
+import static io.github.thegatesdev.actionable.registry.Builders.ENTITY_ENTITY_CONDITION;
 
 public final class EntityEntityConditions extends BuilderRegistry.Static<Predicate<Twin<Entity, Entity>>, ConditionBuilder<Twin<Entity, Entity>>> {
     public EntityEntityConditions(String id) {

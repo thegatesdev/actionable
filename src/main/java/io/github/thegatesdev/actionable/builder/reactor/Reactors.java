@@ -12,7 +12,7 @@ import org.bukkit.event.player.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.thegatesdev.actionable.registry.Registries.*;
+import static io.github.thegatesdev.actionable.registry.Builders.*;
 
 public class Reactors extends BuilderRegistry.Static<ClassListener<?>, ReactorBuilder<?>> {
     private final Map<Class<?>, ReactorBuilder<?>> byEventClass = new HashMap<>();
