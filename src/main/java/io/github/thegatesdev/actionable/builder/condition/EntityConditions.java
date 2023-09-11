@@ -25,6 +25,8 @@ public final class EntityConditions extends BuilderRegistry.Static<Predicate<Ent
             new Options.Builder().add("entity_type", enumeration(EntityType.class))
         ));
 
+        register(new ConditionBuilder<>("dead", (data, entity) -> entity.isDead()));
+
         register(new ConditionBuilder<>("sneaking", (data, entity) -> entity.isSneaking()));
 
         register(new ConditionBuilder<>("frozen", (data, entity) -> entity.isFrozen()));
