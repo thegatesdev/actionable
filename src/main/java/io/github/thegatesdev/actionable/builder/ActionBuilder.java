@@ -61,7 +61,7 @@ public class ActionBuilder<T> implements DataBuilder<Consumer<T>>, Keyed {
     }
 
     public static <A, T> ActionBuilder<Twin<A, T>> flippedFactory(DataTypeHolder<DataValue<Consumer<Twin<T, A>>>> dataType) {
-        return new ActionBuilder<>("flip_actor", (data, o) -> data.<Consumer<Twin<T, A>>>getUnsafe("action").accept(o.flipped()), new Options.Builder().add("action", dataType));
+        return new ActionBuilder<>("flip", (data, o) -> data.<Consumer<Twin<T, A>>>getUnsafe("action").accept(o.flipped()), new Options.Builder().add("action", dataType));
     }
 
     public static <A, T> ActionBuilder<Twin<A, T>> splitFactory(DataTypeHolder<DataValue<Consumer<A>>> actorAction, DataTypeHolder<DataValue<Consumer<T>>> targetAction) {
